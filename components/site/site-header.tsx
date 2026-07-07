@@ -28,17 +28,17 @@ export function SiteHeader({
 }) {
   return (
     <header className="absolute inset-x-0 top-0 z-30">
-      <div className="mx-auto flex h-20 max-w-7xl items-center gap-6 px-6">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-6 sm:h-20 sm:gap-6">
         <Link
           href={logoHref}
           aria-label="Glow & Grace — admin login"
           className="flex flex-col items-center leading-none text-white"
         >
-          <span className="flex items-center gap-1.5 font-lux text-xl font-semibold tracking-wide">
-            <Flower2 className="size-5 text-[#c9a24b]" />
+          <span className="flex items-center gap-1.5 font-lux text-base font-semibold tracking-wide sm:text-xl">
+            <Flower2 className="size-4 text-[#c9a24b] sm:size-5" />
             GLOW &amp; GRACE
           </span>
-          <span className="text-[10px] font-medium tracking-[0.35em] text-[#c9a24b]">
+          <span className="text-[9px] font-medium tracking-[0.3em] text-[#c9a24b] sm:text-[10px] sm:tracking-[0.35em]">
             SALON
           </span>
         </Link>
@@ -62,9 +62,9 @@ export function SiteHeader({
         <div className="ml-auto flex items-center gap-3 lg:ml-0">
           <Link
             href="/book"
-            className="inline-flex h-11 items-center gap-2 rounded-lg bg-linear-to-r from-[#d9bd85] to-[#c9a24b] px-5 text-sm font-semibold text-[#1a1408] shadow-lg shadow-black/20 transition-opacity hover:opacity-90"
+            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-linear-to-r from-[#d9bd85] to-[#c9a24b] px-3 text-xs font-semibold text-[#1a1408] shadow-lg shadow-black/20 transition-opacity hover:opacity-90 sm:h-11 sm:gap-2 sm:px-5 sm:text-sm"
           >
-            <CalendarCheck className="size-4" />
+            <CalendarCheck className="size-3.5 sm:size-4" />
             Book Appointment
           </Link>
 
