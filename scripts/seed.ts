@@ -8,7 +8,10 @@ import { CustomerModel } from "../lib/models/Customer"
 import { BookingModel } from "../lib/models/Booking"
 import { NotificationModel } from "../lib/models/Notification"
 
-const DEV_PASSWORD = "password123"
+// Password for the seeded accounts. Set SEED_PASSWORD in your (gitignored) .env
+// so no real password is ever committed. The fallback is intentionally unusable
+// as a real credential — set SEED_PASSWORD and re-run `npm run seed` to apply.
+const DEV_PASSWORD = process.env.SEED_PASSWORD ?? "change-me-set-SEED_PASSWORD"
 
 const services = [
   { name: "Haircut & Styling", description: "Expert haircut with a professional blowdry and style.", price: 45, duration: 45, category: "Hair" },
