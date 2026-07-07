@@ -16,8 +16,11 @@ export function RecentActivity({ items }: { items: RecentActivityItem[] }) {
         ) : (
           <ul className="flex flex-col gap-3 text-sm">
             {items.map((item) => (
-              <li key={item.id} className="flex flex-col gap-0.5 border-b pb-3 last:border-b-0 last:pb-0">
-                <span>{item.description}</span>
+              <li
+                key={item.id}
+                className="flex min-w-0 flex-col gap-0.5 border-b pb-3 last:border-b-0 last:pb-0"
+              >
+                <span className="break-words">{item.description}</span>
                 <span className="text-xs text-muted-foreground">
                   {formatDistanceToNow(new Date(item.updatedAt), { addSuffix: true })}
                 </span>
