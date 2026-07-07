@@ -1,7 +1,11 @@
 import mongoose from "mongoose"
 import "@/lib/models"
 
-const MONGODB_URI = process.env.MONGODB_URI
+// Sanitize the URI: hosting dashboards (e.g. Vercel) often keep surrounding
+// quotes or stray whitespace/newlines pasted into the value, which makes
+// mongoose throw "Invalid scheme". Trim those so a correctly-typed connection
+// string still works even if it was pasted with quotes.
+const MONGODB_URI = process.env.MONGODB_URI?.trim().replace(/^["']|["']$/g, "")
 
 interface MongooseCache {
   conn: typeof mongoose | null
@@ -20,6 +24,15 @@ export async function connectDB() {
 
   if (!MONGODB_URI) {
     throw new Error("MONGODB_URI environment variable is not set")
+  }
+
+  if (!/^mongodb(\+srv)?:\/\//.test(MONGODB_URI)) {
+    // Show the leading characters (not the credentials) so the actual mistake —
+    // a stray quote, the "MONGODB_URI=" prefix, etc. — is visible in the logs.
+    throw new Error(
+      `MONGODB_URI has an invalid scheme (value starts with "${MONGODB_URI.slice(0, 14)}…"). ` +
+        `It must start with "mongodb://" or "mongodb+srv://" — check your host's env var for quotes or a wrong value.`
+    )
   }
 
   if (!cache.promise) {
