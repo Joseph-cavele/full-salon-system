@@ -1,0 +1,27 @@
+import { NextRequest, NextResponse } from "next/server"
+import { connectDB } from "@/lib/db"
+import { ServiceModel } from "@/lib/models/Service"
+import { serviceInputSchema } from "@/features/services/schema"
+import { getServices } from "@/features/services/server/get-services"
+
+export async function GET() {
+  const services = await getServices()
+  return NextResponse.json(services)
+}
+
+export async function POST(req: NextRequest) {
+  const body = await req.json()
+  const parsed = serviceInputSchema.safeParse(body)
+
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: "Invalid service data", issues: parsed.error.issues },
+      { status: 400 }
+    )
+  }
+
+  await connectDB()
+  const service = await ServiceModel.create(parsed.data)
+
+  return NextResponse.json({ id: String(service._id) }, { status: 201 })
+}

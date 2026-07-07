@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Full-salon-system/**)",
+      "Bash(find /c/Full-salon-system/.claude -type f | sort)",
+      "Read(//c/Full-salon-system/.claude/**)",
+      "Bash(node -e \"const icons = require\\('lucide-react'\\); console.log\\(Object.keys\\(icons\\).filter\\(k => /insta|facebook|twitter|x\\\\b/i.test\\(k\\)\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(npm run *)",
+      "Bash(timeout 60 bash -c 'until curl -sf http://localhost:3000/api/services -o /dev/null; do sleep 2; done')"
+    ]
+  }
+}
