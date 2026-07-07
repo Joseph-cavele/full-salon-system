@@ -172,9 +172,27 @@ export function BookingWizard() {
       await createBooking.mutateAsync(data)
       setSubmitted(true)
       window.scrollTo({ top: 0, behavior: "smooth" })
-    } catch {
-      toast.error("Something went wrong. Please try again.")
+    } catch (err) {
+      // Surface the server's actual reason (e.g. "Stylist not found",
+      // "Invalid booking data") instead of a generic message, so failures
+      // are diagnosable rather than silent.
+      const serverError =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { error?: string } } }).response?.data
+              ?.error
+          : undefined
+      toast.error(serverError || "Something went wrong. Please try again.")
     }
+  }
+
+  // Called when the final submit fails client-side validation, so the Confirm
+  // button never just does nothing.
+  function onInvalid(formErrors: typeof errors) {
+    const firstMessage = Object.values(formErrors).find((e) => e?.message)?.message
+    toast.error(
+      (firstMessage as string) ||
+        "Please complete all required fields before confirming."
+    )
   }
 
   if (submitted) {
@@ -370,7 +388,7 @@ export function BookingWizard() {
             <button
               type="button"
               disabled={createBooking.isPending}
-              onClick={handleSubmit(onSubmit)}
+              onClick={handleSubmit(onSubmit, onInvalid)}
               className="inline-flex h-11 items-center gap-2 rounded-lg bg-linear-to-r from-[#d9bd85] to-[#c9a24b] px-6 text-sm font-semibold text-[#1a1408] hover:opacity-90 disabled:opacity-60"
             >
               {createBooking.isPending && <Loader2 className="size-4 animate-spin" />}
