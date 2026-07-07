@@ -5,6 +5,9 @@ import { connectDB } from "@/lib/db"
 import { UserModel } from "@/lib/models/User"
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  // Trust the deployment host (Vercel serves behind a proxy). Without this,
+  // Auth.js rejects requests as UntrustedHost in production and login fails.
+  trustHost: true,
   session: { strategy: "jwt" },
   pages: { signIn: "/login" },
   providers: [
