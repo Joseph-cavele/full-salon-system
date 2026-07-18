@@ -78,53 +78,96 @@ export function StylistsManagement() {
             No stylists yet. Add your first one.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Stylist</TableHead>
-                  <TableHead>Specialties</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-20" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((stylist) => (
-                  <TableRow key={stylist.id}>
-                    <TableCell className="font-medium">{stylist.name}</TableCell>
-                    <TableCell>
-                      {stylist.services.map((s) => s.name).join(", ") || "—"}
-                    </TableCell>
-                    <TableCell>
+          <>
+            {/* Mobile: stacked cards */}
+            <ul className="flex flex-col gap-3 md:hidden">
+              {data.map((stylist) => (
+                <li
+                  key={stylist.id}
+                  className="flex flex-col gap-2 rounded-lg border p-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="min-w-0 break-words font-medium">
+                      {stylist.name}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
                       <Badge variant={stylist.active ? "default" : "destructive"}>
                         {stylist.active ? "Active" : "Inactive"}
                       </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          aria-label="Edit stylist"
-                          onClick={() => openEdit(stylist)}
-                          className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                          <Pencil className="size-4" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="Remove stylist"
-                          onClick={() => setDeleting(stylist)}
-                          className="inline-flex size-7 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
-                      </div>
-                    </TableCell>
+                      <button
+                        type="button"
+                        aria-label="Edit stylist"
+                        onClick={() => openEdit(stylist)}
+                        className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                      >
+                        <Pencil className="size-4" />
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Remove stylist"
+                        onClick={() => setDeleting(stylist)}
+                        className="inline-flex size-7 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="size-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <p className="break-words text-sm text-muted-foreground">
+                    {stylist.services.map((s) => s.name).join(", ") || "—"}
+                  </p>
+                </li>
+              ))}
+            </ul>
+
+            {/* Desktop/tablet: table */}
+            <div className="hidden overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Stylist</TableHead>
+                    <TableHead>Specialties</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-20" />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {data.map((stylist) => (
+                    <TableRow key={stylist.id}>
+                      <TableCell className="font-medium">{stylist.name}</TableCell>
+                      <TableCell>
+                        {stylist.services.map((s) => s.name).join(", ") || "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={stylist.active ? "default" : "destructive"}>
+                          {stylist.active ? "Active" : "Inactive"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            aria-label="Edit stylist"
+                            onClick={() => openEdit(stylist)}
+                            className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <Pencil className="size-4" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Remove stylist"
+                            onClick={() => setDeleting(stylist)}
+                            className="inline-flex size-7 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
 

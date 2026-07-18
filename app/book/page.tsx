@@ -27,12 +27,12 @@ const features = [
 
 export default function BookPage() {
   return (
-    <div className="flex flex-1 flex-col bg-[#f4f2ec]">
+    <div className="flex flex-1 flex-col bg-[#fcf9f5] text-[#1c1c1a]">
       <SiteHeader />
 
       {/* Hero */}
-      <section className="relative overflow-hidden bg-[#0e0e0e] text-white">
-        <div className="absolute inset-y-0 right-0 w-full sm:w-[58%]">
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 sm:inset-y-0 sm:right-0 sm:left-auto sm:w-[58%]">
           <Image
             src={stockPhotos.hero}
             alt="Salon client with beautifully styled hair"
@@ -41,26 +41,26 @@ export default function BookPage() {
             sizes="(min-width: 640px) 58vw, 100vw"
             className="object-cover object-top"
           />
-          <div className="absolute inset-0 bg-linear-to-r from-[#0e0e0e] via-[#0e0e0e]/85 to-[#0e0e0e]/20 sm:via-[#0e0e0e]/55" />
+          <div className="absolute inset-0 bg-linear-to-t from-[#fcf9f5] via-[#fcf9f5]/70 to-[#fcf9f5]/20 sm:bg-linear-to-r sm:from-[#fcf9f5] sm:via-[#fcf9f5]/40 sm:to-transparent" />
         </div>
 
         <div className="relative mx-auto max-w-7xl px-6 pt-32 pb-16 sm:pt-36 sm:pb-20">
           <div className="max-w-xl">
             <div className="flex items-center gap-3">
-              <span className="text-xs font-semibold tracking-[0.3em] text-[#c9a24b]">
+              <span className="text-xs font-semibold tracking-[0.3em] text-[#775a19]">
                 BOOK YOUR APPOINTMENT
               </span>
-              <span className="h-px w-12 bg-[#c9a24b]/60" />
+              <span className="h-px w-12 bg-[#775a19]/40" />
             </div>
 
-            <h1 className="mt-5 font-lux text-5xl leading-[1.05] font-semibold sm:text-6xl">
+            <h1 className="mt-5 font-lux text-5xl leading-[1.05] font-bold sm:text-6xl">
               We Can&apos;t Wait
               <br />
-              To <span className="italic text-[#c9a24b]">Pamper</span> You
-              <Sparkles className="ml-2 inline size-7 text-[#c9a24b]" />
+              To <span className="italic text-[#775a19]">Pamper</span> You
+              <Sparkles className="ml-2 inline size-7 text-[#775a19]" />
             </h1>
 
-            <p className="mt-5 max-w-md text-sm text-white/70">
+            <p className="mt-5 max-w-md text-sm text-[#444748]">
               Choose your preferred service, stylist, and time. We&apos;ll take
               care of the rest.
             </p>
@@ -69,15 +69,15 @@ export default function BookPage() {
               {heroSteps.map((s, i) => (
                 <div key={s.n} className="flex items-center gap-4">
                   <div className="flex flex-col items-center gap-2 text-center">
-                    <span className="flex size-12 items-center justify-center rounded-full border border-[#c9a24b]/50 text-[#c9a24b]">
+                    <span className="flex size-12 items-center justify-center rounded-full border border-[#775a19]/30 bg-[#fcf9f5]/70 text-[#775a19] backdrop-blur">
                       <s.icon className="size-5" />
                     </span>
-                    <span className="text-xs font-medium text-white/80">
+                    <span className="text-xs font-medium text-[#1c1c1a]/80">
                       {s.n}. {s.label}
                     </span>
                   </div>
                   {i < heroSteps.length - 1 && (
-                    <ChevronRight className="size-4 text-white/30" />
+                    <ChevronRight className="size-4 text-[#1c1c1a]/30" />
                   )}
                 </div>
               ))}
@@ -95,15 +95,15 @@ export default function BookPage() {
 
       {/* Features strip */}
       <section className="px-4 pb-16 sm:px-6">
-        <div className="mx-auto max-w-7xl rounded-2xl bg-white/60 p-6 shadow-sm ring-1 ring-black/5 sm:p-8">
+        <div className="mx-auto max-w-7xl rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5 sm:p-8">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {features.map((f) => (
               <div key={f.title} className="flex items-start gap-3">
-                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#c9a24b]/12 text-[#c9a24b]">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-[#fed488]/50 text-[#785a1a]">
                   <f.icon className="size-5" />
                 </span>
                 <div>
-                  <h3 className="text-sm font-semibold text-[#1a1a1a]">{f.title}</h3>
+                  <h3 className="text-sm font-semibold text-[#1c1c1a]">{f.title}</h3>
                   <p className="mt-0.5 text-xs text-neutral-500">{f.text}</p>
                 </div>
               </div>

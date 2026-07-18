@@ -12,16 +12,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { ServicePerformancePoint } from "@/types"
 
-const SLOT_COLORS: { light: string; dark: string }[] = [
-  { light: "#c9a24b", dark: "#d9bd85" }, // gold
-  { light: "#8a6d3b", dark: "#b9945a" }, // bronze
-  { light: "#b07d4a", dark: "#cf9b63" }, // copper
-  { light: "#6f5a34", dark: "#a08658" }, // deep brass
-  { light: "#e0c88a", dark: "#ecd9a8" }, // light gold
-  { light: "#9c6f42", dark: "#c08a52" }, // caramel
-  { light: "#4f4128", dark: "#8a7550" }, // umber
-  { light: "#d4a373", dark: "#e0b487" }, // sand
-]
+// Cycle through the dashboard theme's chart tokens so slices always match
+// the active theme in both light and dark mode.
+const SLOT_COLORS = [1, 2, 3, 4, 5].map((n) => `var(--chart-${n})`)
 
 export function ServicesPerformanceChart({
   data,
@@ -31,7 +24,7 @@ export function ServicesPerformanceChart({
   const chartConfig = Object.fromEntries(
     data.map((service, i) => [
       service.name,
-      { label: service.name, theme: SLOT_COLORS[i % SLOT_COLORS.length] },
+      { label: service.name, color: SLOT_COLORS[i % SLOT_COLORS.length] },
     ])
   ) satisfies ChartConfig
 
@@ -65,7 +58,7 @@ export function ServicesPerformanceChart({
                 {data.map((service, i) => (
                   <Cell
                     key={service.name}
-                    fill={SLOT_COLORS[i % SLOT_COLORS.length].light}
+                    fill={SLOT_COLORS[i % SLOT_COLORS.length]}
                   />
                 ))}
               </Pie>

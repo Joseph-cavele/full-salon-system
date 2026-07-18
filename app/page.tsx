@@ -1,142 +1,225 @@
 import Image from "next/image"
 import Link from "next/link"
-import {
-  ArrowRight,
-  CalendarCheck,
-  Gem,
-  HeartHandshake,
-  Play,
-  Award,
-  ShieldCheck,
-  Sparkles,
-  Star,
-  Users,
-  Clock,
-  Leaf,
-  Wand2,
-} from "lucide-react"
+import { ArrowRight, Clock, Star } from "lucide-react"
 import { SiteHeader } from "@/components/site/site-header"
 import { SiteFooter } from "@/components/site/site-footer"
-import { stockPhotos, serviceThumb } from "@/lib/stock-photos"
+import { stockPhotos, photos } from "@/lib/stock-photos"
 
-const heroFeatures = [
-  { icon: Gem, title: "Premium Services", text: "High-quality products and services for the best results." },
-  { icon: Users, title: "Expert Stylists", text: "Our certified professionals ensure you look your best." },
-  { icon: ShieldCheck, title: "Hygiene & Safety", text: "Top-notch hygiene standards for your safety and comfort." },
-  { icon: Clock, title: "Flexible Booking", text: "Book your appointment anytime, anywhere." },
+const proofFaces = [
+  { src: photos.definedCurls, alt: "Client" },
+  { src: photos.glamMakeup, alt: "Client" },
+  { src: photos.naturalGlow, alt: "Client" },
 ]
 
-const services = [
-  { title: "Haircut & Styling", text: "Trendy cuts and styling tailored just for you.", img: serviceThumb("Hair", 1) },
-  { title: "Hair Coloring", text: "Vibrant colors that enhance your look.", img: serviceThumb("Hair", 0) },
-  { title: "Skin Care", text: "Rejuvenate your skin with advanced treatments.", img: serviceThumb("Skin", 0) },
-  { title: "Brows & Lashes", text: "Perfect brows and lashes that define you.", img: serviceThumb("Beauty", 0) },
-  { title: "Nail Care", text: "Beautiful nails for every occasion.", img: serviceThumb("Nail", 0) },
+const transformations = [
+  {
+    title: "Signature Hair Design",
+    text: "From dull and frizzy to vibrant, sleek perfection.",
+    img: photos.silkPress,
+  },
+  {
+    title: "Luxe Skin Revitalization",
+    text: "Radiant, glowing results tailored to your unique skin.",
+    img: photos.naturalGlow,
+  },
 ]
 
-const valueProps = [
-  { icon: Gem, title: "Premium Products", text: "We use only high-quality, trusted products." },
-  { icon: HeartHandshake, title: "Personalized Care", text: "Customized treatments for your unique needs." },
-  { icon: Leaf, title: "Relaxing Ambience", text: "A luxurious space to relax and unwind." },
-  { icon: Award, title: "100% Satisfaction", text: "Your satisfaction is our top priority." },
+const signatureServices = [
+  {
+    title: "Knotless Box Braids",
+    text: "Feather-light, tension-free braids installed to protect your edges and turn heads.",
+    price: "R950+",
+    duration: "4–5 hrs",
+    img: photos.boxBraids,
+  },
+  {
+    title: "Silk Press & Style",
+    text: "Wash, treat and press — glass-smooth movement without compromising your curl pattern.",
+    price: "R450+",
+    duration: "90 mins",
+    img: photos.sleekBun,
+  },
+  {
+    title: "Artisan Manicure",
+    text: "Meticulous nail care and artistic design for a polished finish.",
+    price: "R320+",
+    duration: "60 mins",
+    img: photos.nailArt,
+  },
 ]
 
-const aboutChips = [
-  { icon: Users, label: "Experienced Team" },
-  { icon: Wand2, label: "Modern Techniques" },
-  { icon: Sparkles, label: "Luxury Experience" },
-]
-
-const stats = [
-  { icon: Users, value: "5K+", label: "Happy Customers" },
-  { icon: Star, value: "4.9", label: "Average Rating", star: true },
-  { icon: Award, value: "10+", label: "Years of Experience" },
-  { icon: Gem, value: "50+", label: "Services Offered" },
+const artisans = [
+  {
+    name: "Thandi M.",
+    role: "Master Braid Artist",
+    text: "With over a decade of experience in protective styling, Thandi specializes in bespoke braid artistry and precision installs.",
+    img: photos.definedCurls,
+  },
+  {
+    name: "Amara J.",
+    role: "Senior Aesthetician",
+    text: "Amara combines time-honoured techniques with modern science to deliver transformative skincare rituals that restore your natural glow.",
+    img: photos.naturalGlow,
+  },
 ]
 
 const testimonials = [
-  { quote: "The best salon experience I've ever had! The staff is so professional and friendly. I love my new look!", name: "Sarah J." },
-  { quote: "Amazing service and such a relaxing ambience. My hair has never looked better. Highly recommend!", name: "Priya M." },
-  { quote: "From hair to skin, everything is perfect here. Glow & Grace is my go-to salon!", name: "Anjali K." },
+  { quote: "The atmosphere at Glow & Grace is truly a sanctuary. My stylist understood exactly what I wanted, and the results exceeded my expectations.", name: "Lerato M." },
+  { quote: "A world-class experience from start to finish. The attention to detail and the personalized care make every visit special.", name: "Priya N." },
+  { quote: "I've never felt more radiant. The skin revitalisation treatment is a game-changer. Pure luxury!", name: "Ayesha K." },
 ]
 
-function Eyebrow({ children }: { children: React.ReactNode }) {
+function SectionHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs font-semibold tracking-[0.28em] text-[#c9a24b]">
-        {children}
-      </span>
-      <span className="h-px w-12 bg-[#c9a24b]/50" />
+    <div className="mb-16 text-center">
+      <h2 className="mb-2 font-lux text-[36px] leading-[1.2] font-bold text-[#181919] md:text-[48px] md:leading-[1.1] md:tracking-[-0.02em]">
+        {title}
+      </h2>
+      <p className="text-base leading-[1.6] text-[#444748]">{subtitle}</p>
+    </div>
+  )
+}
+
+function FiveStars() {
+  return (
+    <div className="flex gap-0.5 text-[#775a19]">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Star key={i} className="size-4 fill-current" />
+      ))}
     </div>
   )
 }
 
 export default function Home() {
   return (
-    <div className="flex flex-1 flex-col bg-[#f5f2ec]">
+    <div className="flex flex-1 flex-col bg-[#fcf9f5] text-[#1c1c1a] selection:bg-[#fed488] selection:text-[#785a1a]">
       <SiteHeader active="Home" logoHref="/login" />
 
-      {/* Hero */}
-      <section className="relative overflow-hidden bg-[#0e0e0e] text-white">
-        <div className="absolute inset-y-0 right-0 w-full sm:w-[56%]">
-          <Image
-            src={stockPhotos.hero}
-            alt="Glamorous salon client with styled hair"
-            fill
-            priority
-            sizes="(min-width: 640px) 56vw, 100vw"
-            className="object-cover object-top"
-          />
-          <div className="absolute inset-0 bg-linear-to-r from-[#0e0e0e] via-[#0e0e0e]/80 to-[#0e0e0e]/10 sm:via-[#0e0e0e]/50" />
+      {/* Hero Section */}
+      <section className="relative flex min-h-screen items-center overflow-hidden pt-20">
+        {/* Hero Image Canvas */}
+        <div className="absolute inset-0 z-0">
+          <div className="relative h-full w-full motion-safe:animate-[hero-zoom_10s_ease-out_both]">
+            <Image
+              src={stockPhotos.hero}
+              alt="Client wearing fresh cornrow braids"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-[70%_top]"
+            />
+          </div>
+          {/* Overlay for legibility */}
+          <div className="absolute inset-0 z-10 bg-[linear-gradient(to_top,rgba(252,249,245,1)_0%,rgba(252,249,245,0.7)_60%,rgba(252,249,245,0.2)_100%)] md:bg-[linear-gradient(to_right,rgba(252,249,245,0.95)_0%,rgba(252,249,245,0.4)_50%,rgba(252,249,245,0)_100%)]" />
         </div>
 
-        <div className="relative mx-auto max-w-7xl px-6 pt-36 pb-24 sm:pb-32">
-          <div className="max-w-xl">
-            <Eyebrow>BE CONFIDENT. BE BEAUTIFUL.</Eyebrow>
-            <h1 className="mt-6 font-lux text-5xl leading-[1.08] font-semibold sm:text-6xl">
-              Enhance Your Beauty,
-              <br />
-              Elevate Your{" "}
-              <span className="relative italic text-[#c9a24b]">
-                Confidence
-                <span className="absolute -bottom-2 left-0 h-px w-full bg-linear-to-r from-[#c9a24b] to-transparent" />
+        {/* Content Canvas */}
+        <div className="relative z-20 mx-auto w-full max-w-7xl px-5 md:px-16">
+          <div className="flex max-w-[640px] flex-col items-start gap-8 motion-safe:animate-[fade-in-up_0.8s_ease-out_0.3s_both]">
+            {/* Tagline */}
+            <div className="inline-flex items-center gap-2 rounded-[0.75rem] border border-[#c4c7c7]/30 bg-[#f6f3ef] px-3 py-1">
+              <span className="size-2 animate-pulse rounded-full bg-[#775a19]" />
+              <span className="text-xs font-medium tracking-widest text-[#775a19] uppercase">
+                A Sanctuary for the Senses
               </span>
-              <Sparkles className="ml-2 inline size-6 text-[#c9a24b]" />
+            </div>
+
+            {/* Headline */}
+            <h1 className="font-lux text-[36px] leading-[1.2] font-bold text-[#181919] md:text-[48px] md:leading-[1.1] md:tracking-[-0.02em]">
+              Elevate Your <br />
+              <span className="font-normal italic">Natural Beauty</span>
             </h1>
-            <p className="mt-6 max-w-md text-sm text-white/70">
-              Experience premium salon services tailored to bring out the most
-              beautiful version of you.
+
+            {/* Subheadline */}
+            <p className="max-w-[500px] text-lg leading-[1.6] text-[#444748]">
+              Experience bespoke hair and beauty services in a sanctuary of
+              luxury and relaxation. Our artisans craft perfection, tailored to
+              your unique essence.
             </p>
-            <div className="mt-8 flex flex-wrap gap-3">
+
+            {/* CTA Cluster */}
+            <div className="mt-2 flex w-full flex-col items-stretch gap-4 sm:w-auto sm:flex-row sm:items-center">
               <Link
                 href="/book"
-                className="inline-flex h-12 items-center gap-2 rounded-lg bg-linear-to-r from-[#d9bd85] to-[#c9a24b] px-6 text-sm font-semibold text-[#1a1408] shadow-lg shadow-black/20 transition-opacity hover:opacity-90"
+                className="bg-[#181919] px-16 py-4 text-center text-sm font-semibold tracking-[0.05em] text-white shadow-[0_4px_20px_-5px_rgba(119,90,25,0.3)] transition-all duration-300 hover:bg-[#444748] active:scale-95"
               >
-                <CalendarCheck className="size-4" />
-                Book Appointment
+                Book Your Transformation
               </Link>
               <a
-                href="#about"
-                className="inline-flex h-12 items-center gap-2 rounded-lg border border-white/25 px-6 text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                href="#services"
+                className="border border-[#c4c7c7] bg-transparent px-16 py-4 text-center text-sm font-semibold tracking-[0.05em] text-[#1c1c1a] transition-all duration-300 hover:bg-[#f6f3ef]"
               >
-                <Play className="size-4" />
-                Watch Video
+                View Services
               </a>
+            </div>
+
+            {/* Social Proof / Atmospheric Detail */}
+            <div className="mt-16 flex items-center gap-8 border-t border-[#c4c7c7]/30 pt-16">
+              <div className="flex -space-x-3">
+                {proofFaces.map((f) => (
+                  <div
+                    key={f.src}
+                    className="relative flex size-10 items-center justify-center overflow-hidden rounded-[0.75rem] border-2 border-[#fcf9f5] bg-[#e5e2de]"
+                  >
+                    <Image src={f.src} alt={f.alt} fill sizes="40px" className="object-cover" />
+                  </div>
+                ))}
+              </div>
+              <div>
+                <p className="text-xs font-medium tracking-[0.03em] text-[#444748]">
+                  TRUSTED BY 2,000+ CLIENTS
+                </p>
+                <div className="mt-1">
+                  <FiveStars />
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Feature bar */}
-        <div className="relative mx-auto max-w-7xl px-6 pb-10">
-          <div className="grid gap-px overflow-hidden rounded-2xl bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
-            {heroFeatures.map((f) => (
-              <div key={f.title} className="flex items-start gap-3 bg-[#151515] p-5">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full border border-[#c9a24b]/40 text-[#c9a24b]">
-                  <f.icon className="size-4.5" />
-                </span>
-                <div>
-                  <h3 className="text-sm font-semibold">{f.title}</h3>
-                  <p className="mt-0.5 text-xs text-white/50">{f.text}</p>
+        {/* Decorative Floating Element (Quiet Luxury Touch) */}
+        <div className="absolute right-12 bottom-12 z-30 hidden flex-col gap-2 border border-[#c4c7c7]/20 bg-[#fcf9f5]/80 p-8 backdrop-blur-[20px] lg:flex">
+          <span className="text-xs font-medium tracking-[0.2em] text-[#775a19] uppercase">
+            Opening Hours
+          </span>
+          <div className="flex justify-between gap-16">
+            <span className="text-base leading-[1.6] text-[#444748]">Mon — Sat</span>
+            <span className="text-base leading-[1.6] text-[#1c1c1a]">9am — 8pm</span>
+          </div>
+          <div className="flex justify-between gap-16">
+            <span className="text-base leading-[1.6] text-[#444748]">Sunday</span>
+            <span className="text-base leading-[1.6] text-[#1c1c1a]">11am — 5pm</span>
+          </div>
+        </div>
+      </section>
+
+      {/* The Art of Transformation */}
+      <section id="gallery" className="bg-[#fcf9f5] px-5 py-16 md:px-16">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeader
+            title="The Art of Transformation"
+            subtitle="Real results from our master artisans."
+          />
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            {transformations.map((t) => (
+              <div
+                key={t.title}
+                className="overflow-hidden rounded-[0.25rem] border border-[#c4c7c7]/20 bg-white shadow-sm transition-all duration-300 hover:scale-[1.02]"
+              >
+                <div className="relative aspect-square overflow-hidden">
+                  <Image
+                    src={t.img}
+                    alt={`${t.title} Transformation`}
+                    fill
+                    sizes="(min-width: 768px) 50vw, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-8">
+                  <h3 className="mb-2 font-lux text-[24px] leading-[1.4] font-semibold text-[#181919]">
+                    {t.title}
+                  </h3>
+                  <p className="text-base leading-[1.6] text-[#444748]">{t.text}</p>
                 </div>
               </div>
             ))}
@@ -144,201 +227,177 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Services */}
-      <section id="services" className="mx-auto w-full max-w-7xl px-6 py-20">
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <Eyebrow>WHAT WE OFFER</Eyebrow>
-            <h2 className="mt-3 font-lux text-4xl font-semibold text-[#1a1a1a]">
-              Our Services
-            </h2>
-            <p className="mt-2 max-w-sm text-sm text-neutral-500">
-              From hair care to beauty treatments, we offer a wide range of
-              services to pamper you from head to toe.
-            </p>
-          </div>
-          <Link
-            href="/book"
-            className="inline-flex h-11 w-fit items-center gap-2 rounded-lg bg-[#1a1a1a] px-5 text-sm font-semibold text-white transition-colors hover:bg-black"
-          >
-            View All Services
-            <ArrowRight className="size-4" />
-          </Link>
-        </div>
-
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
-          {services.map((s) => (
-            <div key={s.title} className="group flex flex-col">
-              <div className="relative aspect-[4/5] overflow-hidden rounded-2xl">
-                <Image
-                  src={s.img}
-                  alt={s.title}
-                  fill
-                  sizes="(min-width: 1024px) 20vw, (min-width: 640px) 50vw, 100vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                />
+      {/* Signature Services */}
+      <section id="services" className="bg-[#f6f3ef] px-5 py-16 md:px-16">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeader
+            title="Signature Services"
+            subtitle="Curated experiences for the modern individual."
+          />
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {signatureServices.map((s) => (
+              <div
+                key={s.title}
+                className="flex flex-col overflow-hidden rounded-[0.25rem] border border-[#c4c7c7]/20 bg-white shadow-sm transition-all duration-300 hover:scale-[1.02]"
+              >
+                <div className="relative aspect-square overflow-hidden">
+                  <Image
+                    src={s.img}
+                    alt={s.title}
+                    fill
+                    sizes="(min-width: 768px) 33vw, 100vw"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="flex grow flex-col p-8">
+                  <div className="mb-2 flex items-start justify-between gap-3">
+                    <h3 className="font-lux text-[24px] leading-[1.4] font-semibold text-[#181919]">
+                      {s.title}
+                    </h3>
+                    <span className="text-sm font-semibold tracking-[0.05em] whitespace-nowrap text-[#775a19]">
+                      {s.price}
+                    </span>
+                  </div>
+                  <p className="mb-4 text-base leading-[1.6] text-[#444748]">{s.text}</p>
+                  <div className="mt-auto flex items-center justify-between pt-4">
+                    <span className="flex items-center gap-1 text-xs font-medium tracking-[0.03em] text-[#444748]">
+                      <Clock className="size-4" /> {s.duration}
+                    </span>
+                    <Link
+                      href="/book"
+                      className="bg-[#181919] px-4 py-2 text-xs font-medium tracking-[0.03em] text-white transition-all duration-200 hover:opacity-90 active:scale-95"
+                    >
+                      Book Now
+                    </Link>
+                  </div>
+                </div>
               </div>
-              <h3 className="mt-4 font-medium text-[#1a1a1a]">{s.title}</h3>
-              <p className="mt-1 text-sm text-neutral-500">{s.text}</p>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* About Us */}
+      <section id="about" className="bg-[#fcf9f5] px-5 py-16 md:px-16">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeader
+            title="About Us"
+            subtitle="Where beauty meets excellence."
+          />
+          <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
+            <div className="relative aspect-[4/3] overflow-hidden rounded-[0.25rem] border border-[#c4c7c7]/20 shadow-sm">
+              <Image
+                src={stockPhotos.interiorWide}
+                alt="Luxurious Glow & Grace salon interior"
+                fill
+                sizes="(min-width: 768px) 50vw, 100vw"
+                className="object-cover transition-transform duration-300 hover:scale-105"
+              />
+            </div>
+            <div className="flex flex-col gap-4">
+              <p className="text-base leading-[1.6] text-[#444748]">
+                At Glow &amp; Grace Salon, we believe beauty is more than just
+                looks — it&apos;s about confidence, self-care, and feeling your
+                absolute best.
+              </p>
+              <p className="text-base leading-[1.6] text-[#444748]">
+                Our team of expert stylists and beauty professionals are
+                passionate about delivering exceptional results in a luxurious
+                and welcoming environment, right in the heart of Johannesburg.
+              </p>
+              <div className="mt-2 flex flex-wrap gap-x-8 gap-y-2">
+                {["Experienced Team", "Modern Techniques", "Luxury Experience"].map((label) => (
+                  <span
+                    key={label}
+                    className="flex items-center gap-2 text-sm font-semibold tracking-[0.05em] text-[#1c1c1a]"
+                  >
+                    <span className="size-1.5 rounded-full bg-[#775a19]" />
+                    {label}
+                  </span>
+                ))}
+              </div>
               <Link
                 href="/book"
-                className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-[#c9a24b] hover:gap-2.5"
+                className="mt-4 w-fit bg-[#181919] px-16 py-4 text-sm font-semibold tracking-[0.05em] text-white shadow-[0_4px_20px_-5px_rgba(119,90,25,0.3)] transition-all duration-300 hover:bg-[#444748] active:scale-95"
               >
-                Explore <ArrowRight className="size-3.5 transition-all" />
+                Book Your Visit
               </Link>
             </div>
-          ))}
-        </div>
-
-        {/* Value props */}
-        <div className="mt-14 grid gap-6 border-t border-black/5 pt-10 sm:grid-cols-2 lg:grid-cols-4">
-          {valueProps.map((v) => (
-            <div key={v.title} className="flex items-start gap-3">
-              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-[#c9a24b]/12 text-[#c9a24b]">
-                <v.icon className="size-4.5" />
-              </span>
-              <div>
-                <h3 className="text-sm font-semibold text-[#1a1a1a]">{v.title}</h3>
-                <p className="mt-0.5 text-xs text-neutral-500">{v.text}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* About */}
-      <section id="about" className="bg-[#0e0e0e] text-white">
-        <div className="mx-auto grid max-w-7xl items-stretch gap-0 lg:grid-cols-2">
-          <div className="relative min-h-72 lg:min-h-[520px]">
-            <Image
-              src={stockPhotos.salonInterior}
-              alt="Luxurious Glow & Grace salon interior"
-              fill
-              sizes="(min-width: 1024px) 50vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="flex flex-col justify-center gap-5 px-6 py-14 lg:px-14">
-            <Eyebrow>ABOUT US</Eyebrow>
-            <h2 className="font-lux text-4xl font-semibold leading-tight">
-              Where Beauty
-              <br />
-              Meets <span className="italic text-[#c9a24b]">Excellence</span>
-            </h2>
-            <p className="max-w-md text-sm text-white/60">
-              At Glow &amp; Grace Salon, we believe beauty is more than just looks
-              — it&apos;s about confidence, self-care, and feeling your absolute
-              best.
-            </p>
-            <p className="max-w-md text-sm text-white/60">
-              Our team of expert stylists and beauty professionals are passionate
-              about delivering exceptional results in a luxurious and welcoming
-              environment.
-            </p>
-            <div className="flex flex-wrap gap-5 pt-1">
-              {aboutChips.map((c) => (
-                <div key={c.label} className="flex items-center gap-2 text-sm text-white/80">
-                  <c.icon className="size-4 text-[#c9a24b]" />
-                  {c.label}
-                </div>
-              ))}
-            </div>
-            <Link
-              href="/book"
-              className="mt-2 inline-flex h-11 w-fit items-center gap-2 rounded-lg bg-linear-to-r from-[#d9bd85] to-[#c9a24b] px-5 text-sm font-semibold text-[#1a1408] hover:opacity-90"
-            >
-              Learn More About Us
-              <ArrowRight className="size-4" />
-            </Link>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
-      <section className="mx-auto w-full max-w-7xl px-6 py-16">
-        <div className="grid grid-cols-2 gap-8 lg:grid-cols-4">
-          {stats.map((s) => (
-            <div key={s.label} className="flex flex-col items-center text-center">
-              <s.icon className="size-6 text-[#c9a24b]" />
-              <div className="mt-3 flex items-center gap-1 font-lux text-3xl font-semibold text-[#1a1a1a]">
-                {s.value}
-                {s.star && <Star className="size-5 fill-[#c9a24b] text-[#c9a24b]" />}
-              </div>
-              <p className="mt-1 text-sm text-neutral-500">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section id="reviews" className="mx-auto w-full max-w-7xl px-6 pb-20">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <Eyebrow>WHAT OUR CLIENTS SAY</Eyebrow>
-            <h2 className="mt-3 font-lux text-4xl font-semibold text-[#1a1a1a]">
-              Trusted by Thousands
-            </h2>
-          </div>
-          <Link
-            href="/book"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-[#c9a24b] hover:gap-2.5"
-          >
-            View All Reviews <ArrowRight className="size-4 transition-all" />
-          </Link>
-        </div>
-
-        <div className="mt-10 grid gap-5 lg:grid-cols-3">
-          {testimonials.map((t) => (
-            <div key={t.name} className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
-              <span className="font-lux text-4xl leading-none text-[#c9a24b]">&ldquo;</span>
-              <p className="text-sm text-neutral-600">{t.quote}</p>
-              <div className="mt-auto flex items-center justify-between">
-                <div className="flex items-center gap-2.5">
-                  <span className="flex size-9 items-center justify-center rounded-full bg-[#c9a24b]/15 text-sm font-semibold text-[#c9a24b]">
-                    {t.name.slice(0, 1)}
-                  </span>
-                  <span className="text-sm font-medium text-[#1a1a1a]">— {t.name}</span>
-                </div>
-                <div className="flex gap-0.5">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star key={i} className="size-3.5 fill-[#c9a24b] text-[#c9a24b]" />
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="relative overflow-hidden bg-[#0e0e0e] text-white">
-        <div className="absolute inset-y-0 right-0 hidden w-[42%] sm:block">
-          <Image
-            src={serviceThumb("Hair", 2)}
-            alt=""
-            aria-hidden
-            fill
-            sizes="42vw"
-            className="object-cover object-top"
+      {/* Meet Our Artisans */}
+      <section id="artisans" className="bg-[#f6f3ef] px-5 py-16 md:px-16">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeader
+            title="Meet Our Artisans"
+            subtitle="The visionaries behind your transformation."
           />
-          <div className="absolute inset-0 bg-linear-to-r from-[#0e0e0e] via-[#0e0e0e]/70 to-transparent" />
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+            {artisans.map((a) => (
+              <div
+                key={a.name}
+                className="flex flex-col items-center gap-8 rounded-[0.25rem] border border-[#c4c7c7]/20 bg-white p-8 shadow-sm md:flex-row"
+              >
+                <div className="relative aspect-[2/3] w-full overflow-hidden rounded-[0.25rem] md:w-1/2">
+                  <Image
+                    src={a.img}
+                    alt={a.name}
+                    fill
+                    sizes="(min-width: 768px) 25vw, 100vw"
+                    className="object-cover transition-transform duration-300 hover:scale-105"
+                  />
+                </div>
+                <div className="flex w-full flex-col gap-2 md:w-1/2">
+                  <h3 className="font-lux text-[24px] leading-[1.4] font-semibold text-[#181919]">
+                    {a.name}
+                  </h3>
+                  <p className="text-xs font-medium tracking-widest text-[#775a19] uppercase">
+                    {a.role}
+                  </p>
+                  <p className="mt-2 text-base leading-[1.6] text-[#444748]">{a.text}</p>
+                  <Link
+                    href="/book"
+                    className="mt-4 inline-flex items-center gap-2 text-sm font-semibold tracking-[0.05em] text-[#181919] transition-colors hover:text-[#775a19]"
+                  >
+                    View Portfolio
+                    <ArrowRight className="size-[18px]" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="relative mx-auto max-w-7xl px-6 py-16">
-          <div className="max-w-lg">
-            <h2 className="font-lux text-3xl font-semibold sm:text-4xl">
-              Ready to Glow &amp; Grace?
-            </h2>
-            <p className="mt-2 max-w-sm text-sm text-white/60">
-              Book your appointment today and let our experts bring out the best
-              version of you.
-            </p>
-            <Link
-              href="/book"
-              className="mt-6 inline-flex h-12 items-center gap-2 rounded-lg bg-linear-to-r from-[#d9bd85] to-[#c9a24b] px-6 text-sm font-semibold text-[#1a1408] hover:opacity-90"
-            >
-              <CalendarCheck className="size-4" />
-              Book Appointment Now
-            </Link>
+      </section>
+
+      {/* Client Experiences */}
+      <section id="reviews" className="bg-[#fcf9f5] px-5 py-16 md:px-16">
+        <div className="mx-auto max-w-7xl">
+          <SectionHeader
+            title="Client Experiences"
+            subtitle="Voices of those who have experienced our sanctuary."
+          />
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+            {testimonials.map((t) => (
+              <div
+                key={t.name}
+                className="flex flex-col gap-4 rounded-[0.25rem] border border-[#c4c7c7]/20 bg-white p-8 shadow-sm"
+              >
+                <FiveStars />
+                <p className="text-lg leading-[1.6] text-[#1c1c1a] italic">
+                  &ldquo;{t.quote}&rdquo;
+                </p>
+                <div className="mt-auto">
+                  <p className="text-sm font-semibold tracking-[0.05em] text-[#181919]">
+                    {t.name}
+                  </p>
+                  <p className="text-xs font-medium tracking-widest text-[#444748] uppercase">
+                    Verified Client
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

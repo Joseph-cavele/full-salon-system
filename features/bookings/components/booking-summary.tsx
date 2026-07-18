@@ -44,7 +44,7 @@ export function BookingSummary({
         <Separator />
         <SummaryRow
           label="Total price"
-          value={services.length ? `$${totalPrice}` : "—"}
+          value={services.length ? `R${totalPrice}` : "—"}
         />
         <SummaryRow
           label="Total duration"

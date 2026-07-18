@@ -1,35 +1,51 @@
-function unsplash(id: string, width: number) {
-  return `https://images.unsplash.com/photo-${id}?w=${width}&q=80&auto=format&fit=crop`
+// All photography is served locally from /public (Pexels shots of real salon work).
+export const photos = {
+  cornrows: "/pexels-amir-abbaspoor-748889438-19872868.jpg",
+  vanityMirror: "/pexels-artbovich-7750122.jpg",
+  salonFloor: "/pexels-artbovich-7750131.jpg",
+  pedicureLounge: "/pexels-atikah-4967906.jpg",
+  luxeInterior: "/pexels-atikah-4974566.jpg",
+  definedCurls: "/pexels-bruce-taylor-322737340-28935716.jpg",
+  sleekBun: "/pexels-claytonsgallary-30276780.jpg",
+  colourService: "/pexels-cottonbro-3993323.jpg",
+  boxBraids: "/pexels-cottonbro-7190007.jpg",
+  glamMakeup: "/pexels-el-gringo-photo-116752370-36288139.jpg",
+  naturalGlow: "/pexels-gabriella-ally-3664539-13733669.jpg",
+  fauxLocs: "/pexels-heyy-kazz-705792-31682625.jpg",
+  silkPress: "/pexels-junnysema-16826323.jpg",
+  gelManicure: "/pexels-mariia-belinska-1093383493-30294773.jpg",
+  washBasin: "/pexels-oleksandra-23349900.jpg",
+  washLather: "/pexels-oleksandra-23349905.jpg",
+  nailArt: "/pexels-oswal-darks-523820192-16363470.jpg",
+  barberFade: "/pexels-th2city-2035227.jpg",
 }
 
 export const stockPhotos = {
-  hero: unsplash("1634449571010-02389ed0f9b0", 1200),
-  salonInterior: unsplash("1521590832167-7bcbfaa6381f", 1200),
+  hero: photos.cornrows,
+  salonInterior: photos.vanityMirror,
+  interiorWide: photos.luxeInterior,
   gallery: [
-    { src: unsplash("1605980766335-d3a41c7332a1", 600), label: "Balayage" },
-    { src: unsplash("1623428455512-264b33ca8cec", 600), label: "Elegant Updo" },
-    { src: unsplash("1568044852337-9bcc3378fc3c", 600), label: "Sleek & Straight" },
-    { src: unsplash("1554519880-ffe46861d570", 600), label: "Textured Curls" },
-    { src: unsplash("1503951914875-452162b0f3f1", 600), label: "Classic Fade" },
+    { src: photos.boxBraids, label: "Box Braids" },
+    { src: photos.fauxLocs, label: "Faux Locs" },
+    { src: photos.silkPress, label: "Silk Press" },
+    { src: photos.definedCurls, label: "Defined Curls" },
+    { src: photos.sleekBun, label: "Sleek & Sculpted" },
   ],
-  stylistHeadshots: [
-    unsplash("1569925444984-9e2e5fc3d1fb", 300),
-    unsplash("1651684215020-f7a5b6610f23", 300),
-    unsplash("1573496527892-904f897eb744", 300),
-  ],
+  stylistHeadshots: [photos.definedCurls, photos.glamMakeup, photos.naturalGlow],
   // Fallback thumbnails per service category, used when a service has no image.
   serviceByCategory: {
     Hair: [
-      unsplash("1605980766335-d3a41c7332a1", 400),
-      unsplash("1568044852337-9bcc3378fc3c", 400),
-      unsplash("1623428455512-264b33ca8cec", 400),
-      unsplash("1554519880-ffe46861d570", 400),
-      unsplash("1503951914875-452162b0f3f1", 400),
+      photos.cornrows,
+      photos.boxBraids,
+      photos.colourService,
+      photos.silkPress,
+      photos.barberFade,
+      photos.washBasin,
     ],
-    Skin: [unsplash("1616394584738-fc6e612e71b9", 400)],
-    Beauty: [unsplash("1636023730877-233b9237d4ec", 400)],
-    Nail: [unsplash("1632345031435-8727f6897d53", 400)],
-    Packages: [unsplash("1623428455512-264b33ca8cec", 400)],
+    Skin: [photos.naturalGlow],
+    Beauty: [photos.glamMakeup],
+    Nail: [photos.gelManicure, photos.nailArt, photos.pedicureLounge],
+    Packages: [photos.luxeInterior],
   } as Record<string, string[]>,
 }
 

@@ -55,26 +55,50 @@ export function CustomersManagement() {
             No customers found.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Total Bookings</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filtered.map((customer) => (
-                  <TableRow key={customer.id}>
-                    <TableCell className="font-medium">{customer.name}</TableCell>
-                    <TableCell>{customer.email}</TableCell>
-                    <TableCell>{customer.totalBookings}</TableCell>
+          <>
+            {/* Mobile: stacked cards */}
+            <ul className="flex flex-col gap-3 md:hidden">
+              {filtered.map((customer) => (
+                <li
+                  key={customer.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border p-3"
+                >
+                  <div className="flex min-w-0 flex-col">
+                    <span className="break-words font-medium">{customer.name}</span>
+                    <span className="break-all text-xs text-muted-foreground">
+                      {customer.email}
+                    </span>
+                  </div>
+                  <span className="shrink-0 text-sm text-muted-foreground">
+                    {customer.totalBookings} booking
+                    {customer.totalBookings === 1 ? "" : "s"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+
+            {/* Desktop/tablet: table */}
+            <div className="hidden overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Total Bookings</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {filtered.map((customer) => (
+                    <TableRow key={customer.id}>
+                      <TableCell className="font-medium">{customer.name}</TableCell>
+                      <TableCell>{customer.email}</TableCell>
+                      <TableCell>{customer.totalBookings}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

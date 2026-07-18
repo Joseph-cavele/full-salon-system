@@ -34,10 +34,10 @@ function SidebarBrand() {
   return (
     <span className="flex flex-col leading-none">
       <span className="flex items-center gap-1.5 font-lux text-base font-semibold text-sidebar-foreground">
-        <Flower2 className="size-4 text-[#c9a24b]" />
+        <Flower2 className="size-4 text-[#775a19]" />
         GLOW &amp; GRACE
       </span>
-      <span className="pl-5.5 text-[10px] font-medium tracking-[0.3em] text-[#c9a24b]">
+      <span className="pl-5.5 text-[10px] font-medium tracking-[0.3em] text-[#775a19]">
         SALON
       </span>
     </span>

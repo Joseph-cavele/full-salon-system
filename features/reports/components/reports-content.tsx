@@ -1,6 +1,6 @@
 "use client"
 
-import { DollarSign, CalendarCheck, TrendingUp, XCircle, Loader2 } from "lucide-react"
+import { Banknote, CalendarCheck, TrendingUp, XCircle, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Table,
@@ -11,17 +11,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { formatCurrency } from "@/lib/currency"
 import { useReports } from "@/features/reports/hooks/use-reports"
 import { RevenueChart } from "@/features/reports/components/revenue-chart"
 import { StatusChart } from "@/features/reports/components/status-chart"
 
-function money(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value)
-}
+const money = formatCurrency
 
 export function ReportsContent() {
   const { data, isLoading, isError } = useReports()
@@ -46,7 +41,7 @@ export function ReportsContent() {
     {
       label: "Total revenue",
       value: money(data.summary.totalRevenue),
-      icon: DollarSign,
+      icon: Banknote,
       tint: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
     },
     {

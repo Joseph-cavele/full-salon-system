@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { CalendarCheck, Flower2, Menu } from "lucide-react"
+import { Menu } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,11 +12,9 @@ import {
 const links = [
   { label: "Home", href: "/" },
   { label: "Services", href: "/#services" },
-  { label: "About Us", href: "/#about" },
-  { label: "Stylists", href: "/book" },
-  { label: "Gallery", href: "/#services" },
+  { label: "Gallery", href: "/#gallery" },
+  { label: "About", href: "/#about" },
   { label: "Reviews", href: "/#reviews" },
-  { label: "Contact", href: "/#contact" },
 ]
 
 export function SiteHeader({
@@ -27,51 +25,44 @@ export function SiteHeader({
   logoHref?: string
 }) {
   return (
-    <header className="absolute inset-x-0 top-0 z-30">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-6 sm:h-20 sm:gap-6">
+    <header className="fixed inset-x-0 top-0 z-50 border-b border-[#c4c7c7]/30 bg-[#fcf9f5]/80 backdrop-blur-md">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-16">
         <Link
           href={logoHref}
           aria-label="Glow & Grace — admin login"
-          className="flex flex-col items-center leading-none text-white"
+          className="font-lux text-2xl font-bold tracking-tight text-[#181919]"
         >
-          <span className="flex items-center gap-1.5 font-lux text-base font-semibold tracking-wide sm:text-xl">
-            <Flower2 className="size-4 text-[#c9a24b] sm:size-5" />
-            GLOW &amp; GRACE
-          </span>
-          <span className="text-[9px] font-medium tracking-[0.3em] text-[#c9a24b] sm:text-[10px] sm:tracking-[0.35em]">
-            SALON
-          </span>
+          GLOW &amp; GRACE
         </Link>
 
-        <nav className="mx-auto hidden items-center gap-7 text-sm font-medium lg:flex">
+        <nav className="hidden items-center gap-8 lg:flex">
           {links.map((link) => (
             <a
               key={link.label}
               href={link.href}
-              className={
+              className={`text-sm font-semibold tracking-[0.05em] transition-colors duration-300 ${
                 active === link.label
-                  ? "text-[#c9a24b]"
-                  : "text-white/80 transition-colors hover:text-white"
-              }
+                  ? "text-[#775a19]"
+                  : "text-[#444748] hover:text-[#775a19]"
+              }`}
             >
               {link.label}
             </a>
           ))}
         </nav>
 
-        <div className="ml-auto flex items-center gap-3 lg:ml-0">
+        <div className="flex items-center gap-4">
           <Link
             href="/book"
-            className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-linear-to-r from-[#d9bd85] to-[#c9a24b] px-3 text-xs font-semibold text-[#1a1408] shadow-lg shadow-black/20 transition-opacity hover:opacity-90 sm:h-11 sm:gap-2 sm:px-5 sm:text-sm"
+            className="bg-[#181919] px-8 py-2 text-sm font-semibold tracking-[0.05em] text-white shadow-[0_4px_20px_-5px_rgba(119,90,25,0.3)] transition-all duration-200 hover:opacity-90 active:scale-95"
           >
-            <CalendarCheck className="size-3.5 sm:size-4" />
-            Book Appointment
+            Book Now
           </Link>
 
           <DropdownMenu>
             <DropdownMenuTrigger
               aria-label="Open menu"
-              className="inline-flex size-10 items-center justify-center rounded-lg text-white/80 hover:bg-white/10 hover:text-white lg:hidden"
+              className="inline-flex size-10 items-center justify-center text-[#1c1c1a] lg:hidden"
             >
               <Menu className="size-5" />
             </DropdownMenuTrigger>

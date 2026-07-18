@@ -86,7 +86,7 @@ export function BookingManagementRowActions({ booking }: { booking: BookingListI
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Total</span>
-              <span className="font-medium">${booking.total}</span>
+              <span className="font-medium">R{booking.total}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-muted-foreground">Status</span>

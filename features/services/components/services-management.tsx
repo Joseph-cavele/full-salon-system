@@ -84,47 +84,85 @@ export function ServicesManagement() {
             No services yet. Add your first one.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Duration</TableHead>
-                  <TableHead className="w-20" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium">{service.name}</TableCell>
-                    <TableCell>${service.price}</TableCell>
-                    <TableCell>{formatDuration(service.duration)}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        <button
-                          type="button"
-                          aria-label="Edit service"
-                          onClick={() => openEdit(service)}
-                          className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
-                        >
-                          <Pencil className="size-4" />
-                        </button>
-                        <button
-                          type="button"
-                          aria-label="Delete service"
-                          onClick={() => setDeleting(service)}
-                          className="inline-flex size-7 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
-                      </div>
-                    </TableCell>
+          <>
+            {/* Mobile: stacked cards */}
+            <ul className="flex flex-col gap-3 md:hidden">
+              {data.map((service) => (
+                <li
+                  key={service.id}
+                  className="flex items-center justify-between gap-3 rounded-lg border p-3"
+                >
+                  <div className="flex min-w-0 flex-col">
+                    <span className="break-words font-medium">{service.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                      R{service.price} · {formatDuration(service.duration)}
+                    </span>
+                  </div>
+                  <div className="flex shrink-0 items-center gap-1">
+                    <button
+                      type="button"
+                      aria-label="Edit service"
+                      onClick={() => openEdit(service)}
+                      className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      <Pencil className="size-4" />
+                    </button>
+                    <button
+                      type="button"
+                      aria-label="Delete service"
+                      onClick={() => setDeleting(service)}
+                      className="inline-flex size-7 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="size-4" />
+                    </button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Desktop/tablet: table */}
+            <div className="hidden overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Price</TableHead>
+                    <TableHead>Duration</TableHead>
+                    <TableHead className="w-20" />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {data.map((service) => (
+                    <TableRow key={service.id}>
+                      <TableCell className="font-medium">{service.name}</TableCell>
+                      <TableCell>R{service.price}</TableCell>
+                      <TableCell>{formatDuration(service.duration)}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            aria-label="Edit service"
+                            onClick={() => openEdit(service)}
+                            className="inline-flex size-7 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground"
+                          >
+                            <Pencil className="size-4" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Delete service"
+                            onClick={() => setDeleting(service)}
+                            className="inline-flex size-7 items-center justify-center rounded-lg text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
 

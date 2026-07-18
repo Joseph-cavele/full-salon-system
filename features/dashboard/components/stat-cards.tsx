@@ -1,22 +1,15 @@
-import { DollarSign, CalendarCheck, CalendarClock, Hourglass, UsersRound } from "lucide-react"
+import { Banknote, CalendarCheck, CalendarClock, Hourglass, UsersRound } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
+import { formatCurrency } from "@/lib/currency"
 import type { DashboardStats } from "@/types"
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value)
-}
 
 export function StatCards({ stats }: { stats: DashboardStats }) {
   const cards = [
     {
       label: "Total revenue",
       value: formatCurrency(stats.totalRevenue),
-      icon: DollarSign,
+      icon: Banknote,
       tint: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
     },
     {

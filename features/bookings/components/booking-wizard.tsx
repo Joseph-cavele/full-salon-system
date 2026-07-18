@@ -33,9 +33,10 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { stockPhotos, serviceThumb } from "@/lib/stock-photos"
+import { formatCurrency } from "@/lib/currency"
 import type { Service, Stylist } from "@/types"
 
-const GOLD = "#c9a24b"
+const GOLD = "#775a19"
 
 const STEPS = [
   { key: "service", label: "Service", icon: Scissors },
@@ -59,14 +60,6 @@ const TIME_SLOTS = Array.from({ length: 20 }, (_, i) => {
   const m = total % 60
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`
 })
-
-function formatUSD(value: number) {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    maximumFractionDigits: 0,
-  }).format(value)
-}
 
 function formatDuration(minutes: number) {
   if (minutes < 60) return `${minutes} mins`
@@ -198,10 +191,10 @@ export function BookingWizard() {
   if (submitted) {
     return (
       <div className="mx-auto max-w-lg rounded-3xl border border-black/5 bg-white p-10 text-center shadow-sm">
-        <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#c9a24b]/15 text-[#c9a24b]">
+        <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#775a19]/15 text-[#775a19]">
           <Check className="size-7" />
         </span>
-        <h2 className="mt-5 font-lux text-2xl font-semibold text-[#1a1a1a]">
+        <h2 className="mt-5 font-lux text-2xl font-semibold text-[#1c1c1a]">
           Your appointment is booked!
         </h2>
         <p className="mt-2 text-sm text-neutral-500">
@@ -215,7 +208,7 @@ export function BookingWizard() {
             setStep(0)
             setSubmitted(false)
           }}
-          className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-[#1a1a1a] px-6 text-sm font-semibold text-white hover:bg-black"
+          className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-[#1c1c1a] px-6 text-sm font-semibold text-white hover:bg-black"
         >
           Book another appointment
         </button>
@@ -238,9 +231,9 @@ export function BookingWizard() {
                     className={cn(
                       "flex size-10 items-center justify-center rounded-full border transition-colors",
                       state === "active" &&
-                        "border-transparent bg-[#1a1a1a] text-white",
+                        "border-transparent bg-[#1c1c1a] text-white",
                       state === "done" &&
-                        "border-transparent bg-[#c9a24b] text-white",
+                        "border-transparent bg-[#775a19] text-white",
                       state === "upcoming" &&
                         "border-black/10 bg-white text-neutral-400"
                     )}
@@ -255,7 +248,7 @@ export function BookingWizard() {
                     <span
                       className={cn(
                         "my-1 h-8 w-px",
-                        i < step ? "bg-[#c9a24b]" : "bg-black/10"
+                        i < step ? "bg-[#775a19]" : "bg-black/10"
                       )}
                     />
                   )}
@@ -264,7 +257,7 @@ export function BookingWizard() {
                   <p
                     className={cn(
                       "text-sm font-medium",
-                      state === "upcoming" ? "text-neutral-400" : "text-[#1a1a1a]"
+                      state === "upcoming" ? "text-neutral-400" : "text-[#1c1c1a]"
                     )}
                   >
                     {s.label}
@@ -286,9 +279,9 @@ export function BookingWizard() {
               className={cn(
                 "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
                 i === step
-                  ? "bg-[#1a1a1a] text-white"
+                  ? "bg-[#1c1c1a] text-white"
                   : i < step
-                    ? "bg-[#c9a24b]/15 text-[#c9a24b]"
+                    ? "bg-[#775a19]/15 text-[#775a19]"
                     : "bg-neutral-100 text-neutral-400"
               )}
             >
@@ -366,7 +359,7 @@ export function BookingWizard() {
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-black/10 px-5 text-sm font-medium text-[#1a1a1a] hover:bg-neutral-50"
+              className="inline-flex h-11 items-center gap-2 rounded-lg border border-black/10 px-5 text-sm font-medium text-[#1c1c1a] hover:bg-neutral-50"
             >
               <ArrowLeft className="size-4" />
               Back
@@ -379,7 +372,7 @@ export function BookingWizard() {
             <button
               type="button"
               onClick={goNext}
-              className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#1a1a1a] px-6 text-sm font-semibold text-white hover:bg-black"
+              className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#1c1c1a] px-6 text-sm font-semibold text-white hover:bg-black"
             >
               Continue
               <ArrowRight className="size-4" />
@@ -389,7 +382,7 @@ export function BookingWizard() {
               type="button"
               disabled={createBooking.isPending}
               onClick={handleSubmit(onSubmit, onInvalid)}
-              className="inline-flex h-11 items-center gap-2 rounded-lg bg-linear-to-r from-[#d9bd85] to-[#c9a24b] px-6 text-sm font-semibold text-[#1a1408] hover:opacity-90 disabled:opacity-60"
+              className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#181919] px-6 text-sm font-semibold text-white shadow-[0_4px_20px_-5px_rgba(119,90,25,0.5)] hover:bg-black disabled:opacity-60"
             >
               {createBooking.isPending && <Loader2 className="size-4 animate-spin" />}
               Confirm Booking
@@ -408,23 +401,23 @@ export function BookingWizard() {
           serviceImage={serviceImage}
         />
 
-        <div className="rounded-2xl bg-[#c9a24b]/10 p-5 text-center">
-          <h3 className="font-lux text-lg font-semibold text-[#c9a24b]">
+        <div className="rounded-2xl bg-[#775a19]/10 p-5 text-center">
+          <h3 className="font-lux text-lg font-semibold text-[#775a19]">
             Need Help?
           </h3>
           <p className="mt-1 text-xs text-neutral-500">
             Call us or message on WhatsApp for any assistance.
           </p>
-          <div className="mt-4 flex flex-col gap-2 text-sm font-medium text-[#1a1a1a]">
+          <div className="mt-4 flex flex-col gap-2 text-sm font-medium text-[#1c1c1a]">
             <a href="tel:+15551234567" className="flex items-center justify-center gap-2">
-              <Phone className="size-4 text-[#c9a24b]" />
+              <Phone className="size-4 text-[#775a19]" />
               +1 (555) 123-4567
             </a>
             <a
               href="https://wa.me/15551234567"
               className="flex items-center justify-center gap-2"
             >
-              <Sparkles className="size-4 text-[#c9a24b]" />
+              <Sparkles className="size-4 text-[#775a19]" />
               WhatsApp us
             </a>
           </div>
@@ -464,7 +457,7 @@ function ServiceStep({
 
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1a1a1a]">
+      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
         1. Choose Your Service
       </h2>
       <p className="mt-1 text-sm text-neutral-500">
@@ -482,8 +475,8 @@ function ServiceStep({
               className={cn(
                 "flex shrink-0 items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-medium transition-colors sm:w-full",
                 activeCategory === category
-                  ? "border-transparent bg-[#1a1a1a] text-white"
-                  : "border-black/10 bg-white text-[#1a1a1a] hover:border-[#c9a24b]/50"
+                  ? "border-transparent bg-[#1c1c1a] text-white"
+                  : "border-black/10 bg-white text-[#1c1c1a] hover:border-[#775a19]/50"
               )}
             >
               <span>{category}</span>
@@ -512,7 +505,7 @@ function ServiceStep({
               <button
                 type="button"
                 onClick={onRetry}
-                className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#1a1a1a] px-4 text-xs font-semibold text-white hover:bg-black"
+                className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#1c1c1a] px-4 text-xs font-semibold text-white hover:bg-black"
               >
                 Retry
               </button>
@@ -532,21 +525,21 @@ function ServiceStep({
                   className={cn(
                     "flex items-center gap-4 rounded-xl border p-3 text-left transition-colors",
                     active
-                      ? "border-[#c9a24b] bg-[#c9a24b]/5"
-                      : "border-black/10 hover:border-[#c9a24b]/50"
+                      ? "border-[#775a19] bg-[#775a19]/5"
+                      : "border-black/10 hover:border-[#775a19]/50"
                   )}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-medium text-[#1a1a1a]">{service.name}</h3>
+                      <h3 className="font-medium text-[#1c1c1a]">{service.name}</h3>
                       <span
                         className={cn(
                           "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border",
-                          active ? "border-[#c9a24b]" : "border-black/20"
+                          active ? "border-[#775a19]" : "border-black/20"
                         )}
                       >
                         {active && (
-                          <span className="size-2.5 rounded-full bg-[#c9a24b]" />
+                          <span className="size-2.5 rounded-full bg-[#775a19]" />
                         )}
                       </span>
                     </div>
@@ -554,8 +547,8 @@ function ServiceStep({
                       {service.description}
                     </p>
                     <div className="mt-2 flex items-center gap-4 text-sm">
-                      <span className="font-semibold text-[#1a1a1a]">
-                        {formatUSD(service.price)}
+                      <span className="font-semibold text-[#1c1c1a]">
+                        {formatCurrency(service.price)}
                       </span>
                       <span className="flex items-center gap-1 text-neutral-400">
                         <Clock className="size-3.5" />
@@ -612,7 +605,7 @@ function StaffStep({
 
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1a1a1a]">
+      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
         2. Choose Your Stylist
       </h2>
       <p className="mt-1 text-sm text-neutral-500">
@@ -630,7 +623,7 @@ function StaffStep({
           <button
             type="button"
             onClick={onRetry}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#1a1a1a] px-4 text-xs font-semibold text-white hover:bg-black"
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#1c1c1a] px-4 text-xs font-semibold text-white hover:bg-black"
           >
             Retry
           </button>
@@ -651,8 +644,8 @@ function StaffStep({
               className={cn(
                 "flex items-center gap-3 rounded-xl border p-3 text-left transition-colors",
                 active
-                  ? "border-[#c9a24b] bg-[#c9a24b]/5"
-                  : "border-black/10 hover:border-[#c9a24b]/50"
+                  ? "border-[#775a19] bg-[#775a19]/5"
+                  : "border-black/10 hover:border-[#775a19]/50"
               )}
             >
               <Avatar size="lg" className="size-12">
@@ -671,7 +664,7 @@ function StaffStep({
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <h3 className="font-medium text-[#1a1a1a]">{stylist.name}</h3>
+                <h3 className="font-medium text-[#1c1c1a]">{stylist.name}</h3>
                 <p className="line-clamp-1 text-xs text-neutral-500">
                   {stylist.services.map((s) => s.name).slice(0, 2).join(", ") ||
                     stylist.bio ||
@@ -681,10 +674,10 @@ function StaffStep({
               <span
                 className={cn(
                   "flex size-5 shrink-0 items-center justify-center rounded-full border",
-                  active ? "border-[#c9a24b]" : "border-black/20"
+                  active ? "border-[#775a19]" : "border-black/20"
                 )}
               >
-                {active && <span className="size-2.5 rounded-full bg-[#c9a24b]" />}
+                {active && <span className="size-2.5 rounded-full bg-[#775a19]" />}
               </span>
             </button>
           )
@@ -712,7 +705,7 @@ function DateTimeStep({
 }) {
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1a1a1a]">
+      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
         3. Select Date &amp; Time
       </h2>
       <p className="mt-1 text-sm text-neutral-500">
@@ -720,7 +713,7 @@ function DateTimeStep({
       </p>
 
       <div className="mt-5 max-w-xs">
-        <label className="text-sm font-medium text-[#1a1a1a]" htmlFor="booking-date">
+        <label className="text-sm font-medium text-[#1c1c1a]" htmlFor="booking-date">
           Date
         </label>
         <Input
@@ -735,7 +728,7 @@ function DateTimeStep({
       </div>
 
       <div className="mt-5">
-        <p className="text-sm font-medium text-[#1a1a1a]">Available times</p>
+        <p className="text-sm font-medium text-[#1c1c1a]">Available times</p>
         <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
           {TIME_SLOTS.map((slot) => (
             <button
@@ -745,8 +738,8 @@ function DateTimeStep({
               className={cn(
                 "rounded-lg border py-2 text-sm font-medium transition-colors",
                 time === slot
-                  ? "border-transparent bg-[#1a1a1a] text-white"
-                  : "border-black/10 text-[#1a1a1a] hover:border-[#c9a24b]/60"
+                  ? "border-transparent bg-[#1c1c1a] text-white"
+                  : "border-black/10 text-[#1c1c1a] hover:border-[#775a19]/60"
               )}
             >
               {formatTime(slot)}
@@ -774,7 +767,7 @@ function DetailsStep({
 }) {
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1a1a1a]">
+      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
         4. Your Details
       </h2>
       <p className="mt-1 text-sm text-neutral-500">
@@ -783,7 +776,7 @@ function DetailsStep({
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="text-sm font-medium text-[#1a1a1a]" htmlFor="name">
+          <label className="text-sm font-medium text-[#1c1c1a]" htmlFor="name">
             Full name
           </label>
           <Input id="name" className="mt-1.5" {...register("customerName")} />
@@ -794,7 +787,7 @@ function DetailsStep({
           )}
         </div>
         <div>
-          <label className="text-sm font-medium text-[#1a1a1a]" htmlFor="email">
+          <label className="text-sm font-medium text-[#1c1c1a]" htmlFor="email">
             Email
           </label>
           <Input id="email" type="email" className="mt-1.5" {...register("customerEmail")} />
@@ -807,7 +800,7 @@ function DetailsStep({
       </div>
 
       <div className="mt-4">
-        <label className="text-sm font-medium text-[#1a1a1a]" htmlFor="notes">
+        <label className="text-sm font-medium text-[#1c1c1a]" htmlFor="notes">
           Notes <span className="text-neutral-400">(optional)</span>
         </label>
         <Textarea
@@ -819,7 +812,7 @@ function DetailsStep({
       </div>
 
       <div className="mt-4">
-        <p className="text-sm font-medium text-[#1a1a1a]">
+        <p className="text-sm font-medium text-[#1c1c1a]">
           Reference photos <span className="text-neutral-400">(optional)</span>
         </p>
         <p className="mb-2 text-sm text-neutral-500">
@@ -860,7 +853,7 @@ function ReviewStep({
 
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1a1a1a]">
+      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
         5. Review &amp; Confirm
       </h2>
       <p className="mt-1 text-sm text-neutral-500">
@@ -871,13 +864,13 @@ function ReviewStep({
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between px-4 py-3 text-sm">
             <dt className="text-neutral-500">{row.label}</dt>
-            <dd className="font-medium text-[#1a1a1a]">{row.value ?? "—"}</dd>
+            <dd className="font-medium text-[#1c1c1a]">{row.value ?? "—"}</dd>
           </div>
         ))}
         <div className="flex items-center justify-between px-4 py-3.5">
-          <dt className="font-lux text-base font-semibold text-[#1a1a1a]">Total</dt>
-          <dd className="font-lux text-base font-semibold text-[#c9a24b]">
-            {formatUSD(service?.price ?? 0)}
+          <dt className="font-lux text-base font-semibold text-[#1c1c1a]">Total</dt>
+          <dd className="font-lux text-base font-semibold text-[#775a19]">
+            {formatCurrency(service?.price ?? 0)}
           </dd>
         </div>
       </dl>
@@ -908,7 +901,7 @@ function BookingSummary({
       value: date && time ? `${formatDate(date)}, ${formatTime(time)}` : date ? formatDate(date) : undefined,
     },
     { label: "Duration", value: service ? formatDuration(service.duration) : undefined },
-    { label: "Amount", value: service ? formatUSD(service.price) : undefined },
+    { label: "Amount", value: service ? formatCurrency(service.price) : undefined },
   ]
 
   return (
@@ -951,7 +944,7 @@ function BookingSummary({
       <div className="mt-4 flex items-center justify-between">
         <span className="font-lux text-lg font-semibold">Total</span>
         <span className="font-lux text-lg font-semibold" style={{ color: GOLD }}>
-          {formatUSD(service?.price ?? 0)}
+          {formatCurrency(service?.price ?? 0)}
         </span>
       </div>
     </div>

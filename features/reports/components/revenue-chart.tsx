@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 const chartConfig = {
   revenue: {
     label: "Revenue",
-    theme: { light: "#c9a24b", dark: "#d9bd85" },
+    theme: { light: "#775a19", dark: "#e9c176" },
   },
 } satisfies ChartConfig
 
@@ -32,13 +32,13 @@ export function RevenueChart({ data }: { data: { month: string; revenue: number 
               axisLine={false}
               tickMargin={8}
               width={48}
-              tickFormatter={(v: number) => `$${v}`}
+              tickFormatter={(v: number) => `R${v}`}
             />
             <ChartTooltip
               content={
                 <ChartTooltipContent
                   hideLabel={false}
-                  formatter={(value) => `$${Number(value).toLocaleString()}`}
+                  formatter={(value) => `R${Number(value).toLocaleString("en-ZA")}`}
                 />
               }
             />

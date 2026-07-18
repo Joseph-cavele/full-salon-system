@@ -75,38 +75,72 @@ export function BookingsManagement() {
             No bookings in this view.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Service</TableHead>
-                  <TableHead>Stylist</TableHead>
-                  <TableHead>Date & Time</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="w-16" />
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {data.map((booking) => (
-                  <TableRow key={booking.id}>
-                    <TableCell className="font-medium">{booking.customerName}</TableCell>
-                    <TableCell>{booking.serviceNames.join(", ")}</TableCell>
-                    <TableCell>{booking.stylistName}</TableCell>
-                    <TableCell className="whitespace-nowrap">
-                      {booking.bookingDate}, {booking.bookingTime}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={statusVariant[booking.status]}>{booking.status}</Badge>
-                    </TableCell>
-                    <TableCell>
+          <>
+            {/* Mobile: stacked cards */}
+            <ul className="flex flex-col gap-3 md:hidden">
+              {data.map((booking) => (
+                <li
+                  key={booking.id}
+                  className="flex flex-col gap-2 rounded-lg border p-3"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="min-w-0 break-words font-medium">
+                      {booking.customerName}
+                    </span>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <Badge variant={statusVariant[booking.status]}>
+                        {booking.status}
+                      </Badge>
                       <BookingManagementRowActions booking={booking} />
-                    </TableCell>
+                    </div>
+                  </div>
+                  <p className="break-words text-sm text-muted-foreground">
+                    {booking.serviceNames.join(", ")}
+                  </p>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    <span>With {booking.stylistName}</span>
+                    <span>
+                      {booking.bookingDate}, {booking.bookingTime}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+
+            {/* Desktop/tablet: table */}
+            <div className="hidden overflow-x-auto md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Stylist</TableHead>
+                    <TableHead>Date & Time</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="w-16" />
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+                </TableHeader>
+                <TableBody>
+                  {data.map((booking) => (
+                    <TableRow key={booking.id}>
+                      <TableCell className="font-medium">{booking.customerName}</TableCell>
+                      <TableCell>{booking.serviceNames.join(", ")}</TableCell>
+                      <TableCell>{booking.stylistName}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        {booking.bookingDate}, {booking.bookingTime}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={statusVariant[booking.status]}>{booking.status}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <BookingManagementRowActions booking={booking} />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </>
         )}
       </CardContent>
     </Card>

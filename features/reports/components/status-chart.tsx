@@ -12,12 +12,14 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { BookingStatus } from "@/types"
 
-const STATUS_COLORS: Record<BookingStatus, string> = {
-  PENDING: "#d9bd85",
-  CONFIRMED: "#c9a24b",
-  COMPLETED: "#4a7c59",
-  CANCELLED: "#b4462f",
-  NO_SHOW: "#8a7550",
+// Reference-theme status colors: amber = waiting, bronze = confirmed,
+// espresso = done, error red = cancelled, outline gray = no-show.
+const STATUS_COLORS: Record<BookingStatus, { light: string; dark: string }> = {
+  PENDING: { light: "#e9c176", dark: "#ffdea5" },
+  CONFIRMED: { light: "#775a19", dark: "#e9c176" },
+  COMPLETED: { light: "#352c1c", dark: "#d3c5ad" },
+  CANCELLED: { light: "#ba1a1a", dark: "#ffb4ab" },
+  NO_SHOW: { light: "#747878", dark: "#c4c7c7" },
 }
 
 const STATUS_LABEL: Record<BookingStatus, string> = {
@@ -36,14 +38,14 @@ export function StatusChart({
   const chartConfig = Object.fromEntries(
     data.map((d) => [
       d.status,
-      { label: STATUS_LABEL[d.status], color: STATUS_COLORS[d.status] },
+      { label: STATUS_LABEL[d.status], theme: STATUS_COLORS[d.status] },
     ])
   ) satisfies ChartConfig
 
   const chartData = data.map((d) => ({
     status: STATUS_LABEL[d.status],
     count: d.count,
-    fill: STATUS_COLORS[d.status],
+    fill: `var(--color-${d.status})`,
   }))
 
   return (

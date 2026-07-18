@@ -72,7 +72,7 @@ export function ServiceSelector({
                   </div>
                 </div>
                 <div className="flex shrink-0 flex-col items-end text-sm">
-                  <span className="font-medium">${service.price}</span>
+                  <span className="font-medium">R{service.price}</span>
                   <span className="text-muted-foreground">
                     {formatDuration(service.duration)}
                   </span>

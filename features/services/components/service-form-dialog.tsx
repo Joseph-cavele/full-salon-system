@@ -140,7 +140,7 @@ export function ServiceFormDialog({
             </Field>
             <Field orientation="responsive">
               <div className="flex-1">
-                <FieldLabel htmlFor="service-price">Price ($)</FieldLabel>
+                <FieldLabel htmlFor="service-price">Price (R)</FieldLabel>
                 <Input
                   id="service-price"
                   type="number"
