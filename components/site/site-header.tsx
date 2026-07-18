@@ -30,7 +30,7 @@ export function SiteHeader({
         <Link
           href={logoHref}
           aria-label="Glow & Grace — admin login"
-          className="font-lux text-2xl font-bold tracking-tight text-[#181919]"
+          className="font-lux text-lg font-bold tracking-tight text-[#181919] sm:text-2xl"
         >
           GLOW &amp; GRACE
         </Link>
@@ -54,7 +54,7 @@ export function SiteHeader({
         <div className="flex items-center gap-4">
           <Link
             href="/book"
-            className="bg-[#181919] px-8 py-2 text-sm font-semibold tracking-[0.05em] text-white shadow-[0_4px_20px_-5px_rgba(119,90,25,0.3)] transition-all duration-200 hover:opacity-90 active:scale-95"
+            className="hidden bg-[#181919] px-8 py-2 text-sm font-semibold tracking-[0.05em] text-white shadow-[0_4px_20px_-5px_rgba(119,90,25,0.3)] transition-all duration-200 hover:opacity-90 active:scale-95 sm:block"
           >
             Book Now
           </Link>
@@ -72,6 +72,9 @@ export function SiteHeader({
                   {link.label}
                 </DropdownMenuItem>
               ))}
+              <DropdownMenuItem render={<a href="/book" />}>
+                Book Now
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
