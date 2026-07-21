@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { revalidateTag } from "next/cache"
 import { connectDB } from "@/lib/db"
 import { ServiceModel } from "@/lib/models/Service"
 import { serviceInputSchema } from "@/features/services/schema"
@@ -22,6 +23,11 @@ export async function POST(req: NextRequest) {
 
   await connectDB()
   const service = await ServiceModel.create(parsed.data)
+
+  // A new service changes both the services list and the dashboard's
+  // services-performance/revenue figures.
+  revalidateTag("services", "max")
+  revalidateTag("dashboard", "max")
 
   return NextResponse.json({ id: String(service._id) }, { status: 201 })
 }

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { revalidateTag } from "next/cache"
 import { connectDB } from "@/lib/db"
 import { BookingModel } from "@/lib/models/Booking"
 import { NotificationModel } from "@/lib/models/Notification"
@@ -48,6 +49,9 @@ export async function PATCH(
 
   await BookingModel.findByIdAndUpdate(id, { status })
   await NotificationModel.updateMany({ bookingId: id, read: false }, { read: true })
+
+  // Status changes move bookings between the dashboard's counts and revenue.
+  revalidateTag("dashboard", "max")
 
   const serviceNames = booking.services.map((s) => s.name)
 

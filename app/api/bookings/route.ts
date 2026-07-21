@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import { revalidateTag } from "next/cache"
 import { connectDB } from "@/lib/db"
 import { CustomerModel } from "@/lib/models/Customer"
 import { StylistModel } from "@/lib/models/Stylist"
@@ -102,6 +103,9 @@ export async function POST(req: NextRequest) {
       console.error("Failed to send owner notification email", err)
     }
   }
+
+  // A new booking changes the dashboard's counts, revenue and charts.
+  revalidateTag("dashboard", "max")
 
   return NextResponse.json({ id: String(booking._id) }, { status: 201 })
 }

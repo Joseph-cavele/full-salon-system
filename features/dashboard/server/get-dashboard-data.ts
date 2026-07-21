@@ -1,4 +1,6 @@
+import { unstable_cache } from "next/cache"
 import { connectDB } from "@/lib/db"
+import { salonToday } from "@/lib/date"
 import { BookingModel } from "@/lib/models/Booking"
 import { StylistModel } from "@/lib/models/Stylist"
 import type { DashboardData } from "@/types"
@@ -34,7 +36,7 @@ function monthLabel(key: string) {
  * Aggregates all dashboard data in a single pass. Shared by the server-rendered
  * dashboard page (direct call, no HTTP hop) and the /api/dashboard route.
  */
-export async function getDashboardData(): Promise<DashboardData> {
+async function fetchDashboardData(): Promise<DashboardData> {
   await connectDB()
 
   const [bookings, stylistCount] = await Promise.all([
@@ -47,7 +49,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     StylistModel.countDocuments({ active: true }),
   ])
 
-  const todayStr = new Date().toISOString().split("T")[0]
+  const todayStr = salonToday()
 
   const totalRevenue = bookings
     .filter((b) => b.status === "COMPLETED")
@@ -131,3 +133,14 @@ export async function getDashboardData(): Promise<DashboardData> {
     recentActivity,
   }
 }
+
+/**
+ * Cached dashboard aggregation. The DB scan is reused across requests until it
+ * expires (60s — short enough that "today's appointments" stays correct across
+ * a day boundary) or a booking/service mutation calls `revalidateTag("dashboard")`.
+ */
+export const getDashboardData = unstable_cache(
+  fetchDashboardData,
+  ["dashboard-data"],
+  { tags: ["dashboard"], revalidate: 60 }
+)
