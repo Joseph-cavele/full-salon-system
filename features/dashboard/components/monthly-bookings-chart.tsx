@@ -13,7 +13,7 @@ import type { MonthlyBookingPoint } from "@/types"
 const chartConfig = {
   count: {
     label: "Bookings",
-    theme: { light: "#775a19", dark: "#e9c176" },
+    theme: { light: "#ec4899", dark: "#f9a8d4" },
   },
 } satisfies ChartConfig
 

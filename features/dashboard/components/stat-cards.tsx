@@ -5,36 +5,47 @@ import { formatCurrency } from "@/lib/currency"
 import type { DashboardStats } from "@/types"
 
 export function StatCards({ stats }: { stats: DashboardStats }) {
+  /* Tints were emerald/amber/rose/sky — five unrelated stock hues that
+     predated the rosé theme and read as a different product next to it.
+     They now follow one rule, expressed in theme tokens so they track the
+     palette instead of drifting from it again:
+
+       fuchsia  = what the salon earned or is committed to (the numbers
+                  the owner opens the page for)
+       mauve    = what's merely waiting or is roster context
+
+     The icons are decorative — the figures carry the meaning — so the
+     restraint costs nothing and stops the row competing with the charts. */
   const cards = [
     {
       label: "Total revenue",
       value: formatCurrency(stats.totalRevenue),
       icon: Banknote,
-      tint: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      tint: "bg-primary/12 text-primary",
     },
     {
       label: "Total appointments",
       value: stats.totalAppointments.toLocaleString(),
       icon: CalendarCheck,
-      tint: "bg-primary/10 text-primary",
+      tint: "bg-primary/12 text-primary",
     },
     {
       label: "Today's appointments",
       value: stats.todaysAppointments.toLocaleString(),
       icon: CalendarClock,
-      tint: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
+      tint: "bg-primary/12 text-primary",
     },
     {
       label: "Pending appointments",
       value: stats.pendingAppointments.toLocaleString(),
       icon: Hourglass,
-      tint: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+      tint: "bg-muted text-muted-foreground",
     },
     {
       label: "Stylists",
       value: stats.stylistCount.toLocaleString(),
       icon: UsersRound,
-      tint: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+      tint: "bg-muted text-muted-foreground",
     },
   ]
 

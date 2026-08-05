@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 const chartConfig = {
   revenue: {
     label: "Revenue",
-    theme: { light: "#775a19", dark: "#e9c176" },
+    theme: { light: "#ec4899", dark: "#f9a8d4" },
   },
 } satisfies ChartConfig
 

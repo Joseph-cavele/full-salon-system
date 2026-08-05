@@ -12,17 +12,24 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import type { BookingStatus } from "@/types"
 
-// Reference-theme status colors: amber = waiting, bronze = confirmed,
-// espresso = done, error red = cancelled, outline gray = no-show.
+/* Status colours, ramped along the brand's fuchsia arc so "further through
+   the funnel" reads as "deeper pink": pale rose while money is outstanding,
+   full fuchsia once confirmed, deep berry when completed.
+
+   The two exits from the funnel deliberately leave the ramp — cancelled is
+   red and no-show is a neutral mauve-grey. If they stayed on the pink scale
+   they'd read as just another stage rather than a failure. */
 const STATUS_COLORS: Record<BookingStatus, { light: string; dark: string }> = {
-  PENDING: { light: "#e9c176", dark: "#ffdea5" },
-  CONFIRMED: { light: "#775a19", dark: "#e9c176" },
-  COMPLETED: { light: "#352c1c", dark: "#d3c5ad" },
+  PENDING_PAYMENT: { light: "#f9d9e3", dark: "#6b3a52" },
+  PENDING: { light: "#f9a8d4", dark: "#f9a8d4" },
+  CONFIRMED: { light: "#ec4899", dark: "#ec4899" },
+  COMPLETED: { light: "#be185d", dark: "#f472b6" },
   CANCELLED: { light: "#ba1a1a", dark: "#ffb4ab" },
-  NO_SHOW: { light: "#747878", dark: "#c4c7c7" },
+  NO_SHOW: { light: "#7c6b74", dark: "#b9a8b2" },
 }
 
 const STATUS_LABEL: Record<BookingStatus, string> = {
+  PENDING_PAYMENT: "Awaiting payment",
   PENDING: "Pending",
   CONFIRMED: "Confirmed",
   COMPLETED: "Completed",

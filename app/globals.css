@@ -10,6 +10,37 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-lux), ui-serif, Georgia, serif;
+
+  /* Marketing-site faces. Kept separate from --font-sans/--font-heading so the
+     dashboard keeps Inter + Playfair while the public pages run Bodoni Moda. */
+  --font-display: var(--font-display), ui-serif, Georgia, serif;
+  --font-ui: var(--font-ui), ui-sans-serif, system-ui, sans-serif;
+
+  /* ────────────────────────────────────────────────────────────────────
+     Rosé brand palette.
+
+     These are the fixed brand colours, used directly by the marketing
+     pages. The shadcn light/dark tokens further down are now DERIVED FROM
+     THE SAME PALETTE — as of 2026-08-05 the dashboard no longer runs its
+     own ivory/bronze system, which is why it used to look like a
+     different product. If you change a value here, change its oklch
+     counterpart below to match.
+
+     Values are LITERAL here, never `var(--rose-*)` pointing at a separate
+     :root block. This block is `@theme inline`, which inlines whatever
+     it's given straight into the utilities and emits no custom properties
+     of its own — a var() indirection resolves only if something else
+     defines it, and silently produces colourless utilities if that
+     definition is ever dropped. That failure is invisible in the HTML,
+     because the class names still render. Literals cannot fail that way.
+     ──────────────────────────────────────────────────────────────────── */
+  --color-rose-accent: #ec4899;   /* fuchsia — CTAs, eyebrows, icon glyphs */
+  --color-rose-ink: #27212a;      /* headings and nav links */
+  --color-rose-muted: #7c6b74;    /* secondary text */
+  --color-rose-ground: #fdf2f5;   /* pale pink page ground */
+  --color-rose-mid: #f9d9e3;      /* soft fills, hairlines, icon backing */
+  --color-rose-glass: #2b2228;    /* charcoal — hero glass card, used at ~70% */
+  --color-rose-surface: #ffffff;  /* header bar and card surfaces */
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -48,76 +79,97 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-/* Ivory / bronze / espresso theme, matched to the luxe-salon reference:
-   bg #fcf9f5, ink #1c1c1a, primary #181919, bronze #775a19, amber #e9c176/#fed488,
-   espresso sidebar #1f1809. */
+/* ══════════════════════════════════════════════════════════════════════
+   Rosé theme — the SAME palette the marketing pages use, expressed as
+   shadcn tokens so the dashboard inherits it.
+
+   This replaced an ivory/bronze/espresso set (every token sat at oklch
+   hue 85, an amber) that had been left behind when the public site was
+   rethemed to rose. The dashboard was, quite literally, a different
+   colour system bolted to the same app.
+
+   Hues here are ~330–358 (the fuchsia/plum arc). The oklch values are
+   exact conversions of the brand hexes above, so `--primary` and
+   `--color-rose-accent` are the same colour, not merely similar:
+
+     --background  #fdf2f5 rose-ground   --primary  #ec4899 rose-accent
+     --foreground  #27212a rose-ink      --accent   #f9d9e3 rose-mid
+     --sidebar     #1b151a plum          --muted-fg #7c6b74 rose-muted
+
+   `--destructive` stays red on purpose. It has to remain distinguishable
+   from the fuchsia primary, or a delete button reads as a CTA.
+   ══════════════════════════════════════════════════════════════════════ */
 :root {
-  --background: oklch(0.982 0.004 85);
-  --foreground: oklch(0.24 0.004 100);
+  --background: oklch(0.971 0.012 358.8);
+  --foreground: oklch(0.258 0.019 314.5);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.24 0.004 100);
+  --card-foreground: oklch(0.258 0.019 314.5);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.24 0.004 100);
-  --primary: oklch(0.22 0.004 200);
-  --primary-foreground: oklch(0.99 0.002 85);
-  --secondary: oklch(0.963 0.006 85);
-  --secondary-foreground: oklch(0.36 0.008 90);
-  --muted: oklch(0.963 0.006 85);
-  --muted-foreground: oklch(0.53 0.012 90);
-  --accent: oklch(0.93 0.055 85);
-  --accent-foreground: oklch(0.45 0.075 82);
+  --popover-foreground: oklch(0.258 0.019 314.5);
+  --primary: oklch(0.656 0.212 354.3);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.955 0.021 354);
+  --secondary-foreground: oklch(0.36 0.045 348);
+  --muted: oklch(0.962 0.016 353);
+  --muted-foreground: oklch(0.547 0.025 344.8);
+  --accent: oklch(0.915 0.038 357);
+  --accent-foreground: oklch(0.42 0.12 355);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.915 0.006 85);
-  --input: oklch(0.915 0.006 85);
-  --ring: oklch(0.47 0.08 85);
-  --chart-1: oklch(0.47 0.08 85);
-  --chart-2: oklch(0.82 0.085 85);
-  --chart-3: oklch(0.3 0.03 85);
-  --chart-4: oklch(0.6 0.02 85);
-  --chart-5: oklch(0.9 0.045 85);
-  --radius: 0.25rem;
-  --sidebar: oklch(0.963 0.006 85);
-  --sidebar-foreground: oklch(0.24 0.004 100);
-  --sidebar-primary: oklch(0.22 0.004 200);
-  --sidebar-primary-foreground: oklch(0.99 0.002 85);
-  --sidebar-accent: oklch(0.93 0.006 85);
-  --sidebar-accent-foreground: oklch(0.24 0.004 100);
-  --sidebar-border: oklch(0 0 0 / 8%);
-  --sidebar-ring: oklch(0.47 0.08 85);
+  --border: oklch(0.917 0.025 352.5);
+  --input: oklch(0.917 0.025 352.5);
+  --ring: oklch(0.656 0.212 354.3);
+  --chart-1: oklch(0.656 0.212 354.3);
+  --chart-2: oklch(0.823 0.11 346);
+  --chart-3: oklch(0.525 0.199 4);
+  --chart-4: oklch(0.547 0.025 344.8);
+  --chart-5: oklch(0.915 0.038 357);
+  /* Was 0.25rem — near-square, a holdover from the luxe-salon port. The
+     marketing site now runs soft corners (28px cards, pill buttons), so
+     the dashboard meets it partway: soft, but not so round that dense
+     tables start looking like a landing page. */
+  --radius: 0.75rem;
+  --sidebar: oklch(0.205 0.014 331.7);
+  --sidebar-foreground: oklch(0.941 0.013 340.6);
+  --sidebar-primary: oklch(0.656 0.212 354.3);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.294 0.019 329.7);
+  --sidebar-accent-foreground: oklch(0.941 0.013 340.6);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.656 0.212 354.3);
 }
 
 .dark {
-  --background: oklch(0.17 0.014 85);
-  --foreground: oklch(0.94 0.015 85);
-  --card: oklch(0.21 0.018 85);
-  --card-foreground: oklch(0.94 0.015 85);
-  --popover: oklch(0.21 0.018 85);
-  --popover-foreground: oklch(0.94 0.015 85);
-  --primary: oklch(0.82 0.085 85);
-  --primary-foreground: oklch(0.23 0.03 85);
-  --secondary: oklch(0.26 0.02 85);
-  --secondary-foreground: oklch(0.94 0.015 85);
-  --muted: oklch(0.26 0.02 85);
-  --muted-foreground: oklch(0.72 0.03 85);
-  --accent: oklch(0.3 0.035 85);
-  --accent-foreground: oklch(0.94 0.015 85);
+  --background: oklch(0.205 0.014 331.7);
+  --foreground: oklch(0.941 0.013 340.6);
+  --card: oklch(0.241 0.015 330.8);
+  --card-foreground: oklch(0.941 0.013 340.6);
+  --popover: oklch(0.241 0.015 330.8);
+  --popover-foreground: oklch(0.941 0.013 340.6);
+  --primary: oklch(0.656 0.212 354.3);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.294 0.019 329.7);
+  --secondary-foreground: oklch(0.941 0.013 340.6);
+  --muted: oklch(0.294 0.019 329.7);
+  --muted-foreground: oklch(0.749 0.024 341.5);
+  --accent: oklch(0.33 0.045 340);
+  --accent-foreground: oklch(0.941 0.013 340.6);
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.82 0.085 85);
-  --chart-1: oklch(0.82 0.085 85);
-  --chart-2: oklch(0.62 0.08 85);
-  --chart-3: oklch(0.9 0.045 85);
-  --chart-4: oklch(0.5 0.05 85);
-  --chart-5: oklch(0.72 0.06 85);
-  --sidebar: oklch(0.14 0.012 85);
-  --sidebar-foreground: oklch(0.85 0.03 85);
-  --sidebar-primary: oklch(0.82 0.085 85);
-  --sidebar-primary-foreground: oklch(0.23 0.03 85);
-  --sidebar-accent: oklch(0.24 0.025 85);
-  --sidebar-accent-foreground: oklch(0.93 0.02 85);
+  --ring: oklch(0.656 0.212 354.3);
+  --chart-1: oklch(0.656 0.212 354.3);
+  --chart-2: oklch(0.823 0.11 346);
+  --chart-3: oklch(0.7 0.09 350);
+  --chart-4: oklch(0.749 0.024 341.5);
+  --chart-5: oklch(0.5 0.16 5);
+  --sidebar: oklch(0.181 0.011 332.9);
+  --sidebar-foreground: oklch(0.941 0.013 340.6);
+  --sidebar-primary: oklch(0.656 0.212 354.3);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.294 0.019 329.7);
+  --sidebar-accent-foreground: oklch(0.941 0.013 340.6);
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.82 0.085 85);
+  --sidebar-ring: oklch(0.656 0.212 354.3);
 }
 
 @layer base {
@@ -141,6 +193,19 @@
 @keyframes fade-in-up {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hero loc curtain: the strands drop in from above the fold on load. */
+@keyframes strand-in {
+  from { opacity: 0; transform: translateY(-6%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Primary CTA: a light sweeps across the button every few seconds. The long
+   idle tail is baked into the keyframe so one loop covers the whole cycle. */
+@keyframes shimmer-sweep {
+  0%, 62% { transform: translateX(0); }
+  100% { transform: translateX(500%); }
 }
 
 .font-lux {

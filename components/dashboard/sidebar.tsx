@@ -5,7 +5,8 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
-import { ChevronsUpDown, Flower2, LogOut, X } from "lucide-react"
+import NextImage from "next/image"
+import { ChevronsUpDown, LogOut, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useNotifications } from "@/features/notifications/hooks/use-notifications"
 import { useDashboardNav } from "@/components/dashboard/dashboard-nav-context"
@@ -30,15 +31,28 @@ function initials(name?: string | null) {
     .toUpperCase()
 }
 
+/* Mirrors the public site header's lockup — medallion, serif wordmark,
+   fuchsia caption — so the sidebar reads as the same brand rather than the
+   olive Flower2 glyph it used to carry from an earlier theme. The mark is
+   gold line-art on transparent, so it needs a light backing to stay legible
+   against the plum sidebar. */
 function SidebarBrand() {
   return (
-    <span className="flex flex-col leading-none">
-      <span className="flex items-center gap-1.5 font-lux text-base font-semibold text-sidebar-foreground">
-        <Flower2 className="size-4 text-[#775a19]" />
-        GLOW &amp; GRACE
-      </span>
-      <span className="pl-5.5 text-[10px] font-medium tracking-[0.3em] text-[#775a19]">
-        SALON
+    <span className="flex items-center gap-2.5">
+      <NextImage
+        src="/images/logo/patrick-mark.png"
+        alt=""
+        width={32}
+        height={32}
+        className="size-8 shrink-0 rounded-full bg-white/95 object-contain p-0.5"
+      />
+      <span className="flex flex-col leading-none">
+        <span className="font-display text-base font-semibold text-sidebar-foreground">
+          Patrick
+        </span>
+        <span className="text-rose-accent mt-0.5 text-[9px] font-semibold tracking-[0.2em]">
+          DREADLOCKS &amp; BEAUTY
+        </span>
       </span>
     </span>
   )
