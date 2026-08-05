@@ -163,10 +163,12 @@ const featuredByName = new Map(featuredServices.map((s) => [s.name, s]))
    guess that lands a braids photo on the relaxer card is worse than no photo.
    The alt text below describes what is actually in each frame.
 
-   Services deliberately absent, because nothing in the library was verifiably
-   the right subject: "Hair Wash Only" and "Wig Removal". They keep their
-   monogram until a real photo exists. A monogram is honest; a stand-in photo
-   of something else is not. */
+   Every priced service now has a checked photograph. "Hair Wash Only" and
+   "Wig Removal" were the last two without one — both were found on a later
+   pass through the library and are recorded at the bottom of this map. If a
+   new service is added to the price list and no photo in /public/Assets
+   genuinely shows it, leave it out rather than reaching for the nearest
+   thing: a monogram is honest, a stand-in photo of something else is not. */
 const CATALOG_PHOTOS: Record<string, { image: string; alt: string }> = {
   "Starting Dreadlocks (Crochet Method)": {
     image: "/Assets/0571f3e2b011cd0964d0b8261fab1735.jpg",
@@ -212,6 +214,14 @@ const CATALOG_PHOTOS: Record<string, { image: string; alt: string }> = {
     image: "/Assets/40102959944e9d096009f8c4d8ffb54d.jpg",
     alt: "Client in the barber cape with a freshly shaped cut and line-up",
   },
+  "Hair Wash Only": {
+    image: "/Assets/5ed3496165903b919724ab41147f82b2.jpg",
+    alt: "Client reclined at the shampoo basin with their hair lathered",
+  },
+  "Wig Removal": {
+    image: "/Assets/985e3d4c7948e09b6316717212caad81.jpg",
+    alt: "Lace front being lifted away from the hairline at the temple",
+  },
 }
 
 export type CatalogItem = ServiceItem & {
@@ -247,6 +257,31 @@ export const serviceCatalog: CatalogCategory[] = serviceCategories.map(
     }),
   })
 )
+
+/**
+ * Service name → its checked photograph, for consumers that hold a name and
+ * nothing else — chiefly the booking wizard, which reads services from the
+ * `Service` collection and so has no access to the catalogue's structure.
+ *
+ * Derived from `serviceCatalog` rather than assembled separately, so the
+ * booking page and /services can never disagree about which photo belongs to
+ * a service. Names are the exact `serviceCategories` strings, which is also
+ * what the seed writes to the database.
+ *
+ * Before this existed the wizard fell back to `serviceThumb()`, which indexes
+ * a per-category pool of stock photos by the service's position in the whole
+ * list — three photos covering eight dreadlocks services, picked by an index
+ * unrelated to the subject. Every tile showed a plausible salon photo of the
+ * wrong thing, and several showed the same one.
+ */
+export const serviceImageByName: Record<string, { image: string; alt: string }> =
+  Object.fromEntries(
+    serviceCatalog.flatMap((category) =>
+      category.items
+        .filter((item) => item.image && item.alt)
+        .map((item) => [item.name, { image: item.image!, alt: item.alt! }])
+    )
+  )
 
 /** Recent work, for the gallery grid. No overlap with the cards above. */
 export const galleryItems = [

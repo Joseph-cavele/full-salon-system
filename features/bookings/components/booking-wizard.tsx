@@ -35,6 +35,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { stockPhotos, serviceThumb } from "@/lib/stock-photos"
+import { serviceImageByName } from "@/lib/salon-services"
 import { formatCurrency } from "@/lib/currency"
 import type { PaymentMethod, Service, Stylist } from "@/types"
 
@@ -138,12 +139,27 @@ export function BookingWizard() {
   const selectedService = services.find((s) => s.id === values.serviceIds?.[0])
   const selectedStylist = stylists.find((s) => s.id === values.stylistId)
 
+  /* Resolution order matters. A photo stored on the Service document wins,
+     because that is the salon's own upload. Otherwise the curated map keyed
+     by service name — every entry there was opened and looked at, so it
+     actually shows the service being booked. `serviceThumb` is the last
+     resort for a service added to the database but not yet to the catalogue;
+     it picks from a small per-category stock pool and will repeat, which is
+     precisely why it is no longer the first thing tried. */
+  const servicePhoto = (service: Service) => serviceImageByName[service.name]
+
   const serviceImage = (service: Service) =>
     service.image ||
+    servicePhoto(service)?.image ||
     serviceThumb(
       service.category,
       services.findIndex((s) => s.id === service.id)
     )
+
+  /* Describes what is in the frame. Falling back to the service name would
+     make the alt text a duplicate of the heading beside it, which a screen
+     reader then reads twice. */
+  const serviceImageAlt = (service: Service) => servicePhoto(service)?.alt ?? ""
 
   const categoryServices = services.filter(
     (s) => (s.category ?? DEFAULT_SERVICE_CATEGORY) === activeCategory
@@ -329,6 +345,7 @@ export function BookingWizard() {
               setValue("serviceIds", [id], { shouldValidate: true })
             }
             serviceImage={serviceImage}
+            serviceImageAlt={serviceImageAlt}
             isLoading={servicesLoading}
             isError={servicesError}
             onRetry={() => refetchServices()}
@@ -449,6 +466,7 @@ export function BookingWizard() {
           date={values.bookingDate}
           time={values.bookingTime}
           serviceImage={serviceImage}
+          serviceImageAlt={serviceImageAlt}
         />
 
         <div className="rounded-2xl bg-rose-accent/10 p-5 text-center">
@@ -487,6 +505,7 @@ function ServiceStep({
   selectedId,
   onSelect,
   serviceImage,
+  serviceImageAlt,
   isLoading,
   isError,
   onRetry,
@@ -498,6 +517,7 @@ function ServiceStep({
   selectedId?: string
   onSelect: (id: string) => void
   serviceImage: (s: Service) => string
+  serviceImageAlt: (s: Service) => string
   isLoading: boolean
   isError: boolean
   onRetry: () => void
@@ -609,7 +629,7 @@ function ServiceStep({
                   <div className="relative size-20 shrink-0 overflow-hidden rounded-lg">
                     <Image
                       src={serviceImage(service)}
-                      alt={service.name}
+                      alt={serviceImageAlt(service)}
                       fill
                       sizes="80px"
                       className="object-cover"
@@ -954,12 +974,14 @@ function BookingSummary({
   date,
   time,
   serviceImage,
+  serviceImageAlt,
 }: {
   service?: Service
   stylist?: Stylist
   date: string
   time: string
   serviceImage: (s: Service) => string
+  serviceImageAlt: (s: Service) => string
 }) {
   const rows = [
     { label: "Service", value: service?.name },
@@ -982,7 +1004,7 @@ function BookingSummary({
         <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-rose-surface/10">
           <Image
             src={service ? serviceImage(service) : stockPhotos.salonInterior}
-            alt={service?.name ?? "Salon"}
+            alt={service ? serviceImageAlt(service) : ""}
             fill
             sizes="64px"
             className="object-cover"
