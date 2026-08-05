@@ -100,8 +100,30 @@ export function SiteTestimonials() {
     variants: fadeUp(reduce, delay, distance),
   })
 
-  const arrowClass =
-    "absolute top-1/2 z-30 grid size-11 -translate-y-1/2 place-items-center rounded-full bg-rose-surface text-rose-ink shadow-[0_14px_34px_-14px_rgba(39,33,42,0.5)] transition-all duration-300 hover:bg-rose-accent hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-rose-accent sm:size-12"
+  /* No display utility here on purpose — each placement below sets its own,
+     so `hidden`/`grid` can't fight over which one wins. */
+  const navBase =
+    "size-11 place-items-center rounded-full bg-rose-surface text-rose-ink shadow-[0_14px_34px_-14px_rgba(39,33,42,0.5)] transition-all duration-300 hover:bg-rose-accent hover:text-white focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-rose-accent sm:size-12"
+
+  const NavButton = ({
+    dir,
+    className,
+  }: {
+    dir: "prev" | "next"
+    className: string
+  }) => {
+    const Icon = dir === "prev" ? ChevronLeft : ChevronRight
+    return (
+      <button
+        type="button"
+        onClick={() => go(dir === "prev" ? -1 : 1)}
+        aria-label={dir === "prev" ? "Previous testimonial" : "Next testimonial"}
+        className={`${navBase} ${className}`}
+      >
+        <Icon className="size-5" aria-hidden />
+      </button>
+    )
+  }
 
   return (
     <section
@@ -239,44 +261,48 @@ export function SiteTestimonials() {
             })}
           </div>
 
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            aria-label="Previous testimonial"
-            className={`${arrowClass} left-0`}
-          >
-            <ChevronLeft className="size-5" aria-hidden />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => go(1)}
-            aria-label="Next testimonial"
-            className={`${arrowClass} right-0`}
-          >
-            <ChevronRight className="size-5" aria-hidden />
-          </button>
+          {/* Edge arrows, tablet and up only. Below `sm` the card is sized in
+              vw and grows wider than the gap the arrows need, so they landed
+              on top of the quote — and being z-30, they also swallowed the
+              taps that were meant to start a swipe. They move into the
+              control row below instead. */}
+          <NavButton
+            dir="prev"
+            className="absolute top-1/2 left-0 z-30 hidden -translate-y-1/2 sm:grid"
+          />
+          <NavButton
+            dir="next"
+            className="absolute top-1/2 right-0 z-30 hidden -translate-y-1/2 sm:grid"
+          />
         </motion.div>
 
-        <div className="mt-10 flex items-center justify-center gap-2.5">
-          {testimonials.map((item, i) => (
-            <button
-              key={item.name}
-              type="button"
-              onClick={() => setActive(i)}
-              aria-label={`Show testimonial ${i + 1}`}
-              aria-current={i === active}
-              className="group grid size-6 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-accent"
-            >
-              <span
-                className={`block rounded-full transition-all duration-300 ${
-                  i === active
-                    ? "size-2.5 bg-rose-accent"
-                    : "size-2 bg-rose-mid group-hover:bg-rose-accent/50"
-                }`}
-              />
-            </button>
-          ))}
+        {/* One control row: arrows flank the dots on phones, dots alone from
+            `sm` up where the edge arrows take over. */}
+        <div className="mt-10 flex items-center justify-center gap-4 sm:gap-2.5">
+          <NavButton dir="prev" className="grid shrink-0 sm:hidden" />
+
+          <div className="flex items-center gap-2.5">
+            {testimonials.map((item, i) => (
+              <button
+                key={item.name}
+                type="button"
+                onClick={() => setActive(i)}
+                aria-label={`Show testimonial ${i + 1}`}
+                aria-current={i === active}
+                className="group grid size-6 place-items-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-accent"
+              >
+                <span
+                  className={`block rounded-full transition-all duration-300 ${
+                    i === active
+                      ? "size-2.5 bg-rose-accent"
+                      : "size-2 bg-rose-mid group-hover:bg-rose-accent/50"
+                  }`}
+                />
+              </button>
+            ))}
+          </div>
+
+          <NavButton dir="next" className="grid shrink-0 sm:hidden" />
         </div>
       </div>
     </section>
