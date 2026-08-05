@@ -19,6 +19,7 @@ import type { BookingStatus } from "@/types"
 
 const TABS: { label: string; status?: BookingStatus }[] = [
   { label: "All" },
+  { label: "Awaiting payment", status: "PENDING_PAYMENT" },
   { label: "Pending", status: "PENDING" },
   { label: "Confirmed", status: "CONFIRMED" },
   { label: "Cancelled", status: "CANCELLED" },
@@ -26,6 +27,7 @@ const TABS: { label: string; status?: BookingStatus }[] = [
 ]
 
 const statusVariant: Record<BookingStatus, "default" | "secondary" | "destructive" | "outline"> = {
+  PENDING_PAYMENT: "outline",
   PENDING: "secondary",
   CONFIRMED: "default",
   CANCELLED: "destructive",

@@ -26,6 +26,14 @@ import { Label } from "@/components/ui/label"
 type ActionableStatus = "CONFIRMED" | "CANCELLED" | "COMPLETED" | "NO_SHOW"
 
 const ACTIONS_BY_STATUS: Record<BookingStatus, { label: string; status: ActionableStatus }[]> = {
+  /* Awaiting an online payment. "Confirm" is deliberately offered: a customer
+     whose card failed often just pays in the chair, and the salon needs to be
+     able to say so. It does NOT mark the booking paid — paymentStatus is only
+     ever set to PAID by a verified Paystack transaction, never by a click. */
+  PENDING_PAYMENT: [
+    { label: "Confirm (paid in person)", status: "CONFIRMED" },
+    { label: "Cancel", status: "CANCELLED" },
+  ],
   PENDING: [
     { label: "Confirm", status: "CONFIRMED" },
     { label: "Cancel", status: "CANCELLED" },

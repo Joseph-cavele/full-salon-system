@@ -33,26 +33,23 @@ export const stockPhotos = {
   ],
   stylistHeadshots: [photos.definedCurls, photos.glamMakeup, photos.naturalGlow],
   // Fallback thumbnails per service category, used when a service has no image.
+  // Keys must match SERVICE_CATEGORIES in features/services/schema.ts. A
+  // category with no entry here falls through to the default pool below
+  // rather than rendering a broken image, so a mismatch degrades quietly —
+  // check here first if a service tile shows the wrong kind of hair.
   serviceByCategory: {
-    Hair: [
-      photos.cornrows,
-      photos.boxBraids,
-      photos.colourService,
-      photos.silkPress,
-      photos.barberFade,
-      photos.washBasin,
-    ],
-    Skin: [photos.naturalGlow],
-    Beauty: [photos.glamMakeup],
-    Nail: [photos.gelManicure, photos.nailArt, photos.pedicureLounge],
-    Packages: [photos.luxeInterior],
+    Dreadlocks: [photos.fauxLocs, photos.definedCurls, photos.washBasin],
+    Braids: [photos.boxBraids, photos.cornrows],
+    "Cuts & Styling": [photos.barberFade, photos.silkPress, photos.sleekBun],
+    Treatments: [photos.washLather, photos.colourService],
+    Wigs: [photos.sleekBun, photos.silkPress],
   } as Record<string, string[]>,
 }
 
 /** Pick a stable fallback image for a service based on its category and index. */
 export function serviceThumb(category: string | undefined, index: number) {
   const pool =
-    stockPhotos.serviceByCategory[category ?? "Hair"] ??
-    stockPhotos.serviceByCategory.Hair
+    (category ? stockPhotos.serviceByCategory[category] : undefined) ??
+    stockPhotos.serviceByCategory.Dreadlocks
   return pool[index % pool.length]
 }

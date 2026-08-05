@@ -33,6 +33,8 @@ export async function POST(req: NextRequest) {
   const {
     customerName,
     customerEmail,
+    customerPhone,
+    paymentMethod,
     serviceIds,
     stylistId,
     bookingDate,
@@ -56,9 +58,18 @@ export async function POST(req: NextRequest) {
 
   const customer = await CustomerModel.findOneAndUpdate(
     { email: customerEmail },
-    { name: customerName, email: customerEmail },
+    { name: customerName, email: customerEmail, phone: customerPhone },
     { upsert: true, returnDocument: "after" }
   )
+
+  /* Priced from the Service documents just loaded, never from the request.
+     The client sends service IDs; what they cost is the server's business.
+     This figure is what Paystack is asked to charge AND what the verified
+     charge is checked against, so a client-supplied total would let anyone
+     book a R1,500 install for R1. */
+  const amount = services.reduce((sum, s) => sum + (s.price ?? 0), 0)
+
+  const payingOnline = paymentMethod === "ONLINE"
 
   const booking = await BookingModel.create({
     customer: customer._id,
@@ -68,7 +79,12 @@ export async function POST(req: NextRequest) {
     bookingTime,
     description,
     notes,
-    status: "PENDING",
+    amount,
+    paymentMethod,
+    paymentStatus: "UNPAID",
+    /* Paying in person is a normal request the salon then confirms. Paying
+       online holds the slot but confirms nothing until Paystack settles. */
+    status: payingOnline ? "PENDING_PAYMENT" : "PENDING",
   })
 
   if (imageUrls.length > 0) {
@@ -77,14 +93,14 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  await NotificationModel.create({
+  if (!payingOnline) await NotificationModel.create({
     title: "New Booking Request",
     message: `${customerName} requested an appointment with ${stylist.name}`,
     bookingId: booking._id,
     read: false,
   })
 
-  if (resend && process.env.OWNER_EMAIL) {
+  if (!payingOnline && resend && process.env.OWNER_EMAIL) {
     try {
       await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
@@ -107,5 +123,8 @@ export async function POST(req: NextRequest) {
   // A new booking changes the dashboard's counts, revenue and charts.
   revalidateTag("dashboard", "max")
 
-  return NextResponse.json({ id: String(booking._id) }, { status: 201 })
+  return NextResponse.json(
+    { id: String(booking._id), amount, paymentMethod },
+    { status: 201 }
+  )
 }

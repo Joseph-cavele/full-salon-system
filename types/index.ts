@@ -1,4 +1,7 @@
 export type BookingStatus =
+  /** Online payment started, not yet settled. Nothing is confirmed until
+      Paystack verifies the charge. */
+  | "PENDING_PAYMENT"
   | "PENDING"
   | "CONFIRMED"
   | "CANCELLED"
@@ -27,10 +30,14 @@ export interface Stylist {
   services: { id: string; name: string }[]
 }
 
+export type PaymentMethod = "ONLINE" | "IN_PERSON"
+export type PaymentStatus = "UNPAID" | "PAID" | "FAILED"
+
 export interface Customer {
   id: string
   name: string
   email: string
+  phone?: string
 }
 
 export interface BookingImage {
@@ -49,6 +56,12 @@ export interface Booking {
   description?: string
   notes?: string
   status: BookingStatus
+  /** Rand, snapshotted when the booking was made. */
+  amount: number
+  paymentMethod: PaymentMethod
+  paymentStatus: PaymentStatus
+  paymentReference?: string
+  paidAt?: string
   images: BookingImage[]
   createdAt: string
   updatedAt: string
@@ -57,6 +70,8 @@ export interface Booking {
 export interface CreateBookingInput {
   customerName: string
   customerEmail: string
+  customerPhone?: string
+  paymentMethod: PaymentMethod
   serviceIds: string[]
   stylistId: string
   bookingDate: string

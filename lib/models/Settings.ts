@@ -4,7 +4,7 @@ const settingsSchema = new Schema(
   {
     // Singleton key so there is only ever one settings document.
     key: { type: String, default: "salon", unique: true },
-    salonName: { type: String, default: "Glow & Grace Salon" },
+    salonName: { type: String, default: "Patrick Dreadlocks & Beauty Salon" },
     tagline: { type: String, default: "Enhancing your natural beauty" },
     email: { type: String, default: "info@glowandgracesalon.com" },
     phone: { type: String, default: "+1 (555) 123-4567" },

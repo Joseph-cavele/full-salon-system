@@ -1,4 +1,5 @@
 import { unstable_cache } from "next/cache"
+import { DEFAULT_SERVICE_CATEGORY } from "@/features/services/schema"
 import { connectDB } from "@/lib/db"
 import { ServiceModel } from "@/lib/models/Service"
 import type { Service } from "@/types"
@@ -13,7 +14,7 @@ async function fetchServices(): Promise<Service[]> {
     description: s.description,
     price: s.price,
     duration: s.duration,
-    category: s.category ?? "Hair",
+    category: s.category ?? DEFAULT_SERVICE_CATEGORY,
     image: s.image,
   }))
 }

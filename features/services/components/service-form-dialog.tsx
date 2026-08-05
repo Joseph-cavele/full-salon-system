@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react"
 import { toast } from "sonner"
 import {
   serviceInputSchema,
+  DEFAULT_SERVICE_CATEGORY,
   SERVICE_CATEGORIES,
   type ServiceInputValues,
 } from "@/features/services/schema"
@@ -37,7 +38,7 @@ type ServiceCategory = (typeof SERVICE_CATEGORIES)[number]
 function toCategory(value?: string): ServiceCategory {
   return SERVICE_CATEGORIES.includes(value as ServiceCategory)
     ? (value as ServiceCategory)
-    : "Hair"
+    : DEFAULT_SERVICE_CATEGORY
 }
 
 export function ServiceFormDialog({

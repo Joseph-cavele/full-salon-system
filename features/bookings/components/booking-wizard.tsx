@@ -1,4 +1,4 @@
-"use client"
+                                                                                                                                                                                                                                                  "use client"
 
 import { useState } from "react"
 import Image from "next/image"
@@ -12,6 +12,7 @@ import {
   CalendarDays,
   Check,
   Clock,
+  CreditCard,
   Loader2,
   Phone,
   Scissors,
@@ -23,20 +24,20 @@ import {
   createBookingSchema,
   type CreateBookingFormValues,
 } from "@/features/bookings/schema"
-import { SERVICE_CATEGORIES } from "@/features/services/schema"
+import { DEFAULT_SERVICE_CATEGORY, SERVICE_CATEGORIES } from "@/features/services/schema"
 import { useServices } from "@/features/bookings/hooks/use-services"
 import { useStylists } from "@/features/bookings/hooks/use-stylists"
 import { useCreateBooking } from "@/features/bookings/hooks/use-create-booking"
 import { HairstyleUpload } from "@/features/bookings/components/hairstyle-upload"
+import { startPayment } from "@/features/bookings/start-payment"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { stockPhotos, serviceThumb } from "@/lib/stock-photos"
 import { formatCurrency } from "@/lib/currency"
-import type { Service, Stylist } from "@/types"
+import type { PaymentMethod, Service, Stylist } from "@/types"
 
-const GOLD = "#775a19"
 
 const STEPS = [
   { key: "service", label: "Service", icon: Scissors },
@@ -50,7 +51,7 @@ const STEP_FIELDS: (keyof CreateBookingFormValues)[][] = [
   ["serviceIds"],
   ["stylistId"],
   ["bookingDate", "bookingTime"],
-  ["customerName", "customerEmail"],
+  ["customerName", "customerEmail", "customerPhone"],
   [],
 ]
 
@@ -90,7 +91,7 @@ const todayISO = () => new Date().toISOString().split("T")[0]
 export function BookingWizard() {
   const [step, setStep] = useState(0)
   const [activeCategory, setActiveCategory] =
-    useState<(typeof SERVICE_CATEGORIES)[number]>("Hair")
+    useState<(typeof SERVICE_CATEGORIES)[number]>(DEFAULT_SERVICE_CATEGORY)
   const [submitted, setSubmitted] = useState(false)
 
   const {
@@ -120,6 +121,9 @@ export function BookingWizard() {
     defaultValues: {
       customerName: "",
       customerEmail: "",
+      customerPhone: "",
+      // Overwritten by whichever finish button is pressed.
+      paymentMethod: "IN_PERSON",
       serviceIds: [],
       stylistId: "",
       bookingDate: "",
@@ -142,7 +146,7 @@ export function BookingWizard() {
     )
 
   const categoryServices = services.filter(
-    (s) => (s.category ?? "Hair") === activeCategory
+    (s) => (s.category ?? DEFAULT_SERVICE_CATEGORY) === activeCategory
   )
 
   async function goNext() {
@@ -160,12 +164,36 @@ export function BookingWizard() {
     setStep((s) => Math.max(s - 1, 0))
   }
 
+  /* Which button is mid-flight, so only that one spins. `busy` disables both,
+     because double-submitting creates two bookings for the same slot. */
+  const [pendingMethod, setPendingMethod] = useState<PaymentMethod | null>(null)
+  const busy = createBooking.isPending || pendingMethod !== null
+
+  /** Stamps the chosen method onto the form, then runs the normal submit. */
+  const submitWith = (method: PaymentMethod) => () => {
+    setValue("paymentMethod", method)
+    return handleSubmit(onSubmit, onInvalid)()
+  }
+
   async function onSubmit(data: CreateBookingFormValues) {
+    setPendingMethod(data.paymentMethod)
     try {
-      await createBooking.mutateAsync(data)
+      const booking = await createBooking.mutateAsync(data)
+
+      if (data.paymentMethod === "ONLINE") {
+        /* Hands off to Paystack. No success screen here — the booking is not
+           confirmed yet, and saying so before the money moves is the one thing
+           this flow must never do. The callback route decides what the
+           customer sees next. */
+        await startPayment(booking.id)
+        return
+      }
+
+      setPendingMethod(null)
       setSubmitted(true)
       window.scrollTo({ top: 0, behavior: "smooth" })
     } catch (err) {
+      setPendingMethod(null)
       // Surface the server's actual reason (e.g. "Stylist not found",
       // "Invalid booking data") instead of a generic message, so failures
       // are diagnosable rather than silent.
@@ -190,14 +218,14 @@ export function BookingWizard() {
 
   if (submitted) {
     return (
-      <div className="mx-auto max-w-lg rounded-3xl border border-black/5 bg-white p-10 text-center shadow-sm">
-        <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-[#775a19]/15 text-[#775a19]">
+      <div className="mx-auto max-w-lg rounded-3xl border border-rose-mid/60 bg-rose-surface p-10 text-center shadow-sm">
+        <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-rose-accent/15 text-rose-accent">
           <Check className="size-7" />
         </span>
-        <h2 className="mt-5 font-lux text-2xl font-semibold text-[#1c1c1a]">
+        <h2 className="mt-5 font-display text-2xl font-semibold text-rose-ink">
           Your appointment is booked!
         </h2>
-        <p className="mt-2 text-sm text-neutral-500">
+        <p className="mt-2 text-sm text-rose-muted">
           We&apos;ve received your request and will confirm your appointment
           shortly by email.
         </p>
@@ -208,7 +236,7 @@ export function BookingWizard() {
             setStep(0)
             setSubmitted(false)
           }}
-          className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-[#1c1c1a] px-6 text-sm font-semibold text-white hover:bg-black"
+          className="mt-6 inline-flex h-11 items-center gap-2 rounded-lg bg-rose-accent px-6 text-sm font-semibold text-white hover:bg-rose-accent/90"
         >
           Book another appointment
         </button>
@@ -231,11 +259,11 @@ export function BookingWizard() {
                     className={cn(
                       "flex size-10 items-center justify-center rounded-full border transition-colors",
                       state === "active" &&
-                        "border-transparent bg-[#1c1c1a] text-white",
+                        "border-transparent bg-rose-accent text-white",
                       state === "done" &&
-                        "border-transparent bg-[#775a19] text-white",
+                        "border-transparent bg-rose-accent text-white",
                       state === "upcoming" &&
-                        "border-black/10 bg-white text-neutral-400"
+                        "border-rose-mid bg-rose-surface text-rose-muted/70"
                     )}
                   >
                     {state === "done" ? (
@@ -248,7 +276,7 @@ export function BookingWizard() {
                     <span
                       className={cn(
                         "my-1 h-8 w-px",
-                        i < step ? "bg-[#775a19]" : "bg-black/10"
+                        i < step ? "bg-rose-accent" : "bg-rose-mid"
                       )}
                     />
                   )}
@@ -257,7 +285,7 @@ export function BookingWizard() {
                   <p
                     className={cn(
                       "text-sm font-medium",
-                      state === "upcoming" ? "text-neutral-400" : "text-[#1c1c1a]"
+                      state === "upcoming" ? "text-rose-muted/70" : "text-rose-ink"
                     )}
                   >
                     {s.label}
@@ -270,7 +298,7 @@ export function BookingWizard() {
       </aside>
 
       {/* Step content */}
-      <section className="rounded-3xl border border-black/5 bg-white p-5 shadow-sm sm:p-7">
+      <section className="rounded-3xl border border-rose-mid/60 bg-rose-surface p-5 shadow-sm sm:p-7">
         {/* Mobile step chips */}
         <div className="mb-5 flex items-center gap-1.5 overflow-x-auto lg:hidden">
           {STEPS.map((s, i) => (
@@ -279,10 +307,10 @@ export function BookingWizard() {
               className={cn(
                 "shrink-0 rounded-full px-3 py-1 text-xs font-medium",
                 i === step
-                  ? "bg-[#1c1c1a] text-white"
+                  ? "bg-rose-accent text-white"
                   : i < step
-                    ? "bg-[#775a19]/15 text-[#775a19]"
-                    : "bg-neutral-100 text-neutral-400"
+                    ? "bg-rose-accent/15 text-rose-accent"
+                    : "bg-rose-mid/40 text-rose-muted/70"
               )}
             >
               {i + 1}. {s.label}
@@ -359,7 +387,7 @@ export function BookingWizard() {
             <button
               type="button"
               onClick={goBack}
-              className="inline-flex h-11 items-center gap-2 rounded-lg border border-black/10 px-5 text-sm font-medium text-[#1c1c1a] hover:bg-neutral-50"
+              className="inline-flex h-11 items-center gap-2 rounded-lg border border-rose-mid px-5 text-sm font-medium text-rose-ink hover:bg-rose-ground"
             >
               <ArrowLeft className="size-4" />
               Back
@@ -372,21 +400,43 @@ export function BookingWizard() {
             <button
               type="button"
               onClick={goNext}
-              className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#1c1c1a] px-6 text-sm font-semibold text-white hover:bg-black"
+              className="inline-flex h-11 items-center gap-2 rounded-lg bg-rose-accent px-6 text-sm font-semibold text-white hover:bg-rose-accent/90"
             >
               Continue
               <ArrowRight className="size-4" />
             </button>
           ) : (
-            <button
-              type="button"
-              disabled={createBooking.isPending}
-              onClick={handleSubmit(onSubmit, onInvalid)}
-              className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#181919] px-6 text-sm font-semibold text-white shadow-[0_4px_20px_-5px_rgba(119,90,25,0.5)] hover:bg-black disabled:opacity-60"
-            >
-              {createBooking.isPending && <Loader2 className="size-4 animate-spin" />}
-              Confirm Booking
-            </button>
+            /* Two ways to finish, and the choice is the submit. Both create
+               the same booking; only `paymentMethod` differs, which is what
+               decides whether the server holds it at PENDING_PAYMENT and
+               sends the customer to Paystack. */
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <button
+                type="button"
+                disabled={busy}
+                onClick={submitWith("IN_PERSON")}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-rose-mid px-5 text-sm font-semibold text-rose-ink transition-colors hover:border-rose-accent hover:text-rose-accent disabled:opacity-60"
+              >
+                {pendingMethod === "IN_PERSON" && (
+                  <Loader2 className="size-4 animate-spin" />
+                )}
+                Pay in person
+              </button>
+
+              <button
+                type="button"
+                disabled={busy}
+                onClick={submitWith("ONLINE")}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-rose-accent px-6 text-sm font-semibold text-white shadow-[0_4px_20px_-5px_rgba(236,72,153,0.35)] transition-colors hover:bg-rose-accent/90 disabled:opacity-60"
+              >
+                {pendingMethod === "ONLINE" ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <CreditCard className="size-4" aria-hidden />
+                )}
+                {pendingMethod === "ONLINE" ? "Redirecting…" : "Pay now"}
+              </button>
+            </div>
           )}
         </div>
       </section>
@@ -401,23 +451,23 @@ export function BookingWizard() {
           serviceImage={serviceImage}
         />
 
-        <div className="rounded-2xl bg-[#775a19]/10 p-5 text-center">
-          <h3 className="font-lux text-lg font-semibold text-[#775a19]">
+        <div className="rounded-2xl bg-rose-accent/10 p-5 text-center">
+          <h3 className="font-display text-lg font-semibold text-rose-accent">
             Need Help?
           </h3>
-          <p className="mt-1 text-xs text-neutral-500">
+          <p className="mt-1 text-xs text-rose-muted">
             Call us or message on WhatsApp for any assistance.
           </p>
-          <div className="mt-4 flex flex-col gap-2 text-sm font-medium text-[#1c1c1a]">
+          <div className="mt-4 flex flex-col gap-2 text-sm font-medium text-rose-ink">
             <a href="tel:+15551234567" className="flex items-center justify-center gap-2">
-              <Phone className="size-4 text-[#775a19]" />
+              <Phone className="size-4 text-rose-accent" />
               +1 (555) 123-4567
             </a>
             <a
               href="https://wa.me/15551234567"
               className="flex items-center justify-center gap-2"
             >
-              <Sparkles className="size-4 text-[#775a19]" />
+              <Sparkles className="size-4 text-rose-accent" />
               WhatsApp us
             </a>
           </div>
@@ -453,14 +503,14 @@ function ServiceStep({
   onRetry: () => void
 }) {
   const countByCategory = (category: string) =>
-    services.filter((s) => (s.category ?? "Hair") === category).length
+    services.filter((s) => (s.category ?? DEFAULT_SERVICE_CATEGORY) === category).length
 
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
+      <h2 className="font-display text-xl font-semibold text-rose-ink">
         1. Choose Your Service
       </h2>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-rose-muted">
         Select the service you would like to book.
       </p>
 
@@ -475,15 +525,15 @@ function ServiceStep({
               className={cn(
                 "flex shrink-0 items-center justify-between gap-2 rounded-xl border px-3.5 py-2.5 text-sm font-medium transition-colors sm:w-full",
                 activeCategory === category
-                  ? "border-transparent bg-[#1c1c1a] text-white"
-                  : "border-black/10 bg-white text-[#1c1c1a] hover:border-[#775a19]/50"
+                  ? "border-transparent bg-rose-accent text-white"
+                  : "border-rose-mid bg-rose-surface text-rose-ink hover:border-rose-accent/50"
               )}
             >
               <span>{category}</span>
               <span
                 className={cn(
                   "hidden text-xs sm:inline",
-                  activeCategory === category ? "text-white/60" : "text-neutral-400"
+                  activeCategory === category ? "text-white/60" : "text-rose-muted/70"
                 )}
               >
                 {countByCategory(category)}
@@ -495,23 +545,23 @@ function ServiceStep({
         {/* Service cards */}
         <div className="flex flex-col gap-3">
           {isLoading ? (
-            <div className="flex items-center justify-center gap-2 py-12 text-sm text-neutral-500">
+            <div className="flex items-center justify-center gap-2 py-12 text-sm text-rose-muted">
               <Loader2 className="size-4 animate-spin" />
               Loading services…
             </div>
           ) : isError ? (
-            <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-black/10 py-12 text-center text-sm text-neutral-500">
+            <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed border-rose-mid py-12 text-center text-sm text-rose-muted">
               Couldn&apos;t load services. Please try again.
               <button
                 type="button"
                 onClick={onRetry}
-                className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#1c1c1a] px-4 text-xs font-semibold text-white hover:bg-black"
+                className="inline-flex h-9 items-center gap-2 rounded-lg bg-rose-accent px-4 text-xs font-semibold text-white hover:bg-rose-accent/90"
               >
                 Retry
               </button>
             </div>
           ) : categoryServices.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-black/10 py-12 text-center text-sm text-neutral-400">
+            <div className="rounded-xl border border-dashed border-rose-mid py-12 text-center text-sm text-rose-muted/70">
               No services in this category yet.
             </div>
           ) : (
@@ -525,32 +575,32 @@ function ServiceStep({
                   className={cn(
                     "flex items-center gap-4 rounded-xl border p-3 text-left transition-colors",
                     active
-                      ? "border-[#775a19] bg-[#775a19]/5"
-                      : "border-black/10 hover:border-[#775a19]/50"
+                      ? "border-rose-accent bg-rose-accent/5"
+                      : "border-rose-mid hover:border-rose-accent/50"
                   )}
                 >
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-medium text-[#1c1c1a]">{service.name}</h3>
+                      <h3 className="font-medium text-rose-ink">{service.name}</h3>
                       <span
                         className={cn(
                           "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border",
-                          active ? "border-[#775a19]" : "border-black/20"
+                          active ? "border-rose-accent" : "border-rose-mid"
                         )}
                       >
                         {active && (
-                          <span className="size-2.5 rounded-full bg-[#775a19]" />
+                          <span className="size-2.5 rounded-full bg-rose-accent" />
                         )}
                       </span>
                     </div>
-                    <p className="mt-1 line-clamp-2 text-sm text-neutral-500">
+                    <p className="mt-1 line-clamp-2 text-sm text-rose-muted">
                       {service.description}
                     </p>
                     <div className="mt-2 flex items-center gap-4 text-sm">
-                      <span className="font-semibold text-[#1c1c1a]">
+                      <span className="font-semibold text-rose-ink">
                         {formatCurrency(service.price)}
                       </span>
-                      <span className="flex items-center gap-1 text-neutral-400">
+                      <span className="flex items-center gap-1 text-rose-muted/70">
                         <Clock className="size-3.5" />
                         {formatDuration(service.duration)}
                       </span>
@@ -605,31 +655,31 @@ function StaffStep({
 
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
+      <h2 className="font-display text-xl font-semibold text-rose-ink">
         2. Choose Your Stylist
       </h2>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-rose-muted">
         Pick the professional you&apos;d like to book with.
       </p>
 
       {isLoading ? (
-        <div className="flex items-center justify-center gap-2 py-12 text-sm text-neutral-500">
+        <div className="flex items-center justify-center gap-2 py-12 text-sm text-rose-muted">
           <Loader2 className="size-4 animate-spin" />
           Loading stylists…
         </div>
       ) : isError ? (
-        <div className="mt-5 flex flex-col items-center gap-3 rounded-xl border border-dashed border-black/10 py-12 text-center text-sm text-neutral-500">
+        <div className="mt-5 flex flex-col items-center gap-3 rounded-xl border border-dashed border-rose-mid py-12 text-center text-sm text-rose-muted">
           Couldn&apos;t load stylists. Please try again.
           <button
             type="button"
             onClick={onRetry}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-[#1c1c1a] px-4 text-xs font-semibold text-white hover:bg-black"
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-rose-accent px-4 text-xs font-semibold text-white hover:bg-rose-accent/90"
           >
             Retry
           </button>
         </div>
       ) : list.length === 0 ? (
-        <div className="mt-5 rounded-xl border border-dashed border-black/10 py-12 text-center text-sm text-neutral-400">
+        <div className="mt-5 rounded-xl border border-dashed border-rose-mid py-12 text-center text-sm text-rose-muted/70">
           No stylists available right now.
         </div>
       ) : (
@@ -644,8 +694,8 @@ function StaffStep({
               className={cn(
                 "flex items-center gap-3 rounded-xl border p-3 text-left transition-colors",
                 active
-                  ? "border-[#775a19] bg-[#775a19]/5"
-                  : "border-black/10 hover:border-[#775a19]/50"
+                  ? "border-rose-accent bg-rose-accent/5"
+                  : "border-rose-mid hover:border-rose-accent/50"
               )}
             >
               <Avatar size="lg" className="size-12">
@@ -664,8 +714,8 @@ function StaffStep({
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <h3 className="font-medium text-[#1c1c1a]">{stylist.name}</h3>
-                <p className="line-clamp-1 text-xs text-neutral-500">
+                <h3 className="font-medium text-rose-ink">{stylist.name}</h3>
+                <p className="line-clamp-1 text-xs text-rose-muted">
                   {stylist.services.map((s) => s.name).slice(0, 2).join(", ") ||
                     stylist.bio ||
                     "Salon stylist"}
@@ -674,10 +724,10 @@ function StaffStep({
               <span
                 className={cn(
                   "flex size-5 shrink-0 items-center justify-center rounded-full border",
-                  active ? "border-[#775a19]" : "border-black/20"
+                  active ? "border-rose-accent" : "border-rose-mid"
                 )}
               >
-                {active && <span className="size-2.5 rounded-full bg-[#775a19]" />}
+                {active && <span className="size-2.5 rounded-full bg-rose-accent" />}
               </span>
             </button>
           )
@@ -705,15 +755,15 @@ function DateTimeStep({
 }) {
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
+      <h2 className="font-display text-xl font-semibold text-rose-ink">
         3. Select Date &amp; Time
       </h2>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-rose-muted">
         Choose when you&apos;d like your appointment.
       </p>
 
       <div className="mt-5 max-w-xs">
-        <label className="text-sm font-medium text-[#1c1c1a]" htmlFor="booking-date">
+        <label className="text-sm font-medium text-rose-ink" htmlFor="booking-date">
           Date
         </label>
         <Input
@@ -728,7 +778,7 @@ function DateTimeStep({
       </div>
 
       <div className="mt-5">
-        <p className="text-sm font-medium text-[#1c1c1a]">Available times</p>
+        <p className="text-sm font-medium text-rose-ink">Available times</p>
         <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
           {TIME_SLOTS.map((slot) => (
             <button
@@ -738,8 +788,8 @@ function DateTimeStep({
               className={cn(
                 "rounded-lg border py-2 text-sm font-medium transition-colors",
                 time === slot
-                  ? "border-transparent bg-[#1c1c1a] text-white"
-                  : "border-black/10 text-[#1c1c1a] hover:border-[#775a19]/60"
+                  ? "border-transparent bg-rose-accent text-white"
+                  : "border-rose-mid text-rose-ink hover:border-rose-accent/60"
               )}
             >
               {formatTime(slot)}
@@ -767,16 +817,16 @@ function DetailsStep({
 }) {
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
+      <h2 className="font-display text-xl font-semibold text-rose-ink">
         4. Your Details
       </h2>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-rose-muted">
         Tell us who the appointment is for.
       </p>
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         <div>
-          <label className="text-sm font-medium text-[#1c1c1a]" htmlFor="name">
+          <label className="text-sm font-medium text-rose-ink" htmlFor="name">
             Full name
           </label>
           <Input id="name" className="mt-1.5" {...register("customerName")} />
@@ -787,7 +837,7 @@ function DetailsStep({
           )}
         </div>
         <div>
-          <label className="text-sm font-medium text-[#1c1c1a]" htmlFor="email">
+          <label className="text-sm font-medium text-rose-ink" htmlFor="email">
             Email
           </label>
           <Input id="email" type="email" className="mt-1.5" {...register("customerEmail")} />
@@ -797,11 +847,29 @@ function DetailsStep({
             </p>
           )}
         </div>
+        <div>
+          <label className="text-sm font-medium text-rose-ink" htmlFor="phone">
+            Phone number
+          </label>
+          <Input
+            id="phone"
+            type="tel"
+            autoComplete="tel"
+            placeholder="+27 82 123 4567"
+            className="mt-1.5"
+            {...register("customerPhone")}
+          />
+          {errors.customerPhone && (
+            <p className="mt-1 text-sm text-destructive">
+              {errors.customerPhone.message}
+            </p>
+          )}
+        </div>
       </div>
 
       <div className="mt-4">
-        <label className="text-sm font-medium text-[#1c1c1a]" htmlFor="notes">
-          Notes <span className="text-neutral-400">(optional)</span>
+        <label className="text-sm font-medium text-rose-ink" htmlFor="notes">
+          Notes <span className="text-rose-muted/70">(optional)</span>
         </label>
         <Textarea
           id="notes"
@@ -812,10 +880,10 @@ function DetailsStep({
       </div>
 
       <div className="mt-4">
-        <p className="text-sm font-medium text-[#1c1c1a]">
-          Reference photos <span className="text-neutral-400">(optional)</span>
+        <p className="text-sm font-medium text-rose-ink">
+          Reference photos <span className="text-rose-muted/70">(optional)</span>
         </p>
-        <p className="mb-2 text-sm text-neutral-500">
+        <p className="mb-2 text-sm text-rose-muted">
           Share inspiration for the look you want.
         </p>
         <HairstyleUpload onChange={onImages} error={errors.imageUrls?.message} />
@@ -853,23 +921,23 @@ function ReviewStep({
 
   return (
     <div>
-      <h2 className="font-lux text-xl font-semibold text-[#1c1c1a]">
+      <h2 className="font-display text-xl font-semibold text-rose-ink">
         5. Review &amp; Confirm
       </h2>
-      <p className="mt-1 text-sm text-neutral-500">
+      <p className="mt-1 text-sm text-rose-muted">
         Please review your appointment details before confirming.
       </p>
 
-      <dl className="mt-5 divide-y divide-black/5 rounded-xl border border-black/5">
+      <dl className="mt-5 divide-y divide-rose-mid rounded-xl border border-rose-mid/60">
         {rows.map((row) => (
           <div key={row.label} className="flex items-center justify-between px-4 py-3 text-sm">
-            <dt className="text-neutral-500">{row.label}</dt>
-            <dd className="font-medium text-[#1c1c1a]">{row.value ?? "—"}</dd>
+            <dt className="text-rose-muted">{row.label}</dt>
+            <dd className="font-medium text-rose-ink">{row.value ?? "—"}</dd>
           </div>
         ))}
         <div className="flex items-center justify-between px-4 py-3.5">
-          <dt className="font-lux text-base font-semibold text-[#1c1c1a]">Total</dt>
-          <dd className="font-lux text-base font-semibold text-[#775a19]">
+          <dt className="font-display text-base font-semibold text-rose-ink">Total</dt>
+          <dd className="font-display text-base font-semibold text-rose-accent">
             {formatCurrency(service?.price ?? 0)}
           </dd>
         </div>
@@ -905,13 +973,13 @@ function BookingSummary({
   ]
 
   return (
-    <div className="rounded-2xl bg-[#171717] p-5 text-white">
-      <h3 className="font-lux text-lg font-semibold" style={{ color: GOLD }}>
+    <div className="rounded-2xl bg-rose-glass p-5 text-white">
+      <h3 className="font-display text-lg font-semibold text-rose-accent">
         Your Booking Summary
       </h3>
 
       <div className="mt-4 flex items-center gap-3">
-        <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-white/10">
+        <div className="relative size-16 shrink-0 overflow-hidden rounded-lg bg-rose-surface/10">
           <Image
             src={service ? serviceImage(service) : stockPhotos.salonInterior}
             alt={service?.name ?? "Salon"}
@@ -942,8 +1010,8 @@ function BookingSummary({
       </dl>
 
       <div className="mt-4 flex items-center justify-between">
-        <span className="font-lux text-lg font-semibold">Total</span>
-        <span className="font-lux text-lg font-semibold" style={{ color: GOLD }}>
+        <span className="font-display text-lg font-semibold">Total</span>
+        <span className="font-display text-lg font-semibold text-rose-accent">
           {formatCurrency(service?.price ?? 0)}
         </span>
       </div>
