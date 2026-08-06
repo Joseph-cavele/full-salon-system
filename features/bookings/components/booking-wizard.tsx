@@ -36,6 +36,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { stockPhotos, serviceThumb } from "@/lib/stock-photos"
 import { serviceImageByName } from "@/lib/salon-services"
+import { SALON_PHONE, SALON_PHONE_DISPLAY, SALON_WHATSAPP } from "@/lib/salon-contact"
 import { formatCurrency } from "@/lib/currency"
 import type { PaymentMethod, Service, Stylist } from "@/types"
 
@@ -477,12 +478,14 @@ export function BookingWizard() {
             Call us or message on WhatsApp for any assistance.
           </p>
           <div className="mt-4 flex flex-col gap-2 text-sm font-medium text-rose-ink">
-            <a href="tel:+15551234567" className="flex items-center justify-center gap-2">
+            <a href={`tel:${SALON_PHONE}`} className="flex items-center justify-center gap-2">
               <Phone className="size-4 text-rose-accent" />
-              +1 (555) 123-4567
+              {SALON_PHONE_DISPLAY}
             </a>
             <a
-              href="https://wa.me/15551234567"
+              href={`https://wa.me/${SALON_WHATSAPP}`}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center justify-center gap-2"
             >
               <Sparkles className="size-4 text-rose-accent" />

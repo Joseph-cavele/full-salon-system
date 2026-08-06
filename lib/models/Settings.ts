@@ -6,9 +6,15 @@ const settingsSchema = new Schema(
     key: { type: String, default: "salon", unique: true },
     salonName: { type: String, default: "Patrick Dreadlocks & Beauty Salon" },
     tagline: { type: String, default: "Enhancing your natural beauty" },
-    email: { type: String, default: "info@glowandgracesalon.com" },
-    phone: { type: String, default: "+1 (555) 123-4567" },
-    address: { type: String, default: "123 Beauty Street, New York, NY 10001" },
+    /* Defaults are the salon's real details, not samples. They were a New
+       York address and a +1 (555) number left over from the "Glow & Grace"
+       era, which a fresh install would have shown as though they were
+       genuine. Kept in step with lib/salon-contact.ts by hand — this model
+       cannot import it, since the seed and the API both load the schema
+       outside the app's module graph. */
+    email: { type: String, default: "booking@patrickdreadlocks.co.za" },
+    phone: { type: String, default: "074 780 9371" },
+    address: { type: String, default: "Kempton Park, Johannesburg, South Africa" },
     openingHours: { type: String, default: "Mon–Sat: 9:00 AM – 8:00 PM" },
     notificationEmail: { type: String, default: "" },
     emailNotifications: { type: Boolean, default: true },

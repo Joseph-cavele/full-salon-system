@@ -20,6 +20,13 @@ import { toast } from "sonner"
 import { apiClient } from "@/lib/api-client"
 import { fadeUp } from "@/lib/motion"
 import {
+  SALON_ADDRESS,
+  SALON_EMAIL,
+  SALON_PHONE,
+  SALON_PHONE_DISPLAY,
+  SALON_WHATSAPP,
+} from "@/lib/salon-contact"
+import {
   contactMessageSchema,
   DEFAULT_DIAL_CODE,
   DIAL_CODES,
@@ -38,13 +45,13 @@ import {
    number. Replace it with the real street address and the map, the
    directions link and the address line all follow.
 
-   `PHONE` and `WHATSAPP` mirror the placeholders already in
-   site-header.tsx — swap all of them together.
+   The number and email are imported, not re-declared. This file used to
+   carry its own copies alongside site-header.tsx's, which is how a
+   placeholder number survived here after the real one was set.
    ══════════════════════════════════════════════════════════════════════ */
-const SALON_ADDRESS = "Kempton Park, Johannesburg, South Africa"
-const PHONE = "+27 11 000 0000"
-const WHATSAPP = "27110000000"
-const EMAIL = "info@patricksalon.com"
+const PHONE = SALON_PHONE_DISPLAY
+const WHATSAPP = SALON_WHATSAPP
+const EMAIL = SALON_EMAIL
 
 /* Matches the Settings model's default ("Mon–Sat: 9:00 AM – 8:00 PM").
    Confirm before publishing — a customer who arrives to a locked door
@@ -453,8 +460,11 @@ export function SiteContact() {
                   {SALON_ADDRESS}
                 </p>
 
+                {/* Dial the international form, print the local one. Stripping
+                    spaces off the display string, as this used to, yields a
+                    bare 0-prefixed number that fails from abroad. */}
                 <a
-                  href={`tel:${PHONE.replace(/\s/g, "")}`}
+                  href={`tel:${SALON_PHONE}`}
                   className="flex items-center gap-3 font-ui text-sm text-rose-muted transition-colors hover:text-rose-accent"
                 >
                   <Phone className="size-4 shrink-0 text-rose-accent" aria-hidden />

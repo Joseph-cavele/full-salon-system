@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { SALON_PHONE, SALON_WHATSAPP } from "@/lib/salon-contact"
 
 /* ══════════════════════════════════════════════════════════════════════
    IMAGE SLOT — the medallion, cropped out of the full logo poster. Swap
@@ -19,11 +20,11 @@ import {
    ══════════════════════════════════════════════════════════════════════ */
 const LOGO_MARK = "/images/logo/patrick-mark.png"
 
-/* Placeholder contact details. lib/models/Settings.ts already stores the real
-   `phone` and `email` — once a server component passes them down, delete these
-   rather than keeping two copies that can drift apart. */
-const PHONE = "+27110000000"
-const WHATSAPP = "27110000000"
+/* Contact details come from lib/salon-contact.ts. They used to be a second
+   hardcoded copy here, which is how the header kept a placeholder number
+   after the real one was set. Import, never re-declare. */
+const PHONE = SALON_PHONE
+const WHATSAPP = SALON_WHATSAPP
 
 /* Ordered to match the Rosé Luxe reference. Every link now resolves to a real
    section — `#contact` is the contact form, hours and map (SiteContact), which

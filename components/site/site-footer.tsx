@@ -1,8 +1,10 @@
+import { SALON_EMAIL } from "@/lib/salon-contact"
+
 const footerLinks = [
   { label: "Privacy Policy", href: "#" },
   { label: "Terms of Service", href: "#" },
   { label: "Careers", href: "#" },
-  { label: "Contact", href: "mailto:info@patricksalon.com" },
+  { label: "Contact", href: `mailto:${SALON_EMAIL}` },
 ]
 
 /* Deep charcoal-plum, matching the hero's glass card, so the pale pink body has
