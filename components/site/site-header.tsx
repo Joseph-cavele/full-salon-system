@@ -11,7 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { SALON_PHONE, SALON_WHATSAPP } from "@/lib/salon-contact"
+import { SALON_PHONE, WHATSAPP_MESSAGES, whatsappLink } from "@/lib/salon-contact"
 
 /* ══════════════════════════════════════════════════════════════════════
    IMAGE SLOT — the medallion, cropped out of the full logo poster. Swap
@@ -24,7 +24,7 @@ const LOGO_MARK = "/images/logo/patrick-mark.png"
    hardcoded copy here, which is how the header kept a placeholder number
    after the real one was set. Import, never re-declare. */
 const PHONE = SALON_PHONE
-const WHATSAPP = SALON_WHATSAPP
+const WHATSAPP_HREF = whatsappLink(WHATSAPP_MESSAGES.general)
 
 /* Ordered to match the Rosé Luxe reference. Every link now resolves to a real
    section — `#contact` is the contact form, hours and map (SiteContact), which
@@ -146,7 +146,7 @@ export function SiteHeader({
             <Phone className="size-4" />
           </a>
           <a
-            href={`https://wa.me/${WHATSAPP}`}
+            href={WHATSAPP_HREF}
             target="_blank"
             rel="noopener noreferrer"
             aria-label="Message the salon on WhatsApp"
@@ -178,7 +178,7 @@ export function SiteHeader({
               <DropdownMenuItem render={<a href="/book" />}>Book Now</DropdownMenuItem>
               <DropdownMenuItem render={<a href={`tel:${PHONE}`} />}>Call us</DropdownMenuItem>
               <DropdownMenuItem
-                render={<a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer" />}
+                render={<a href={WHATSAPP_HREF} target="_blank" rel="noopener noreferrer" />}
               >
                 WhatsApp
               </DropdownMenuItem>

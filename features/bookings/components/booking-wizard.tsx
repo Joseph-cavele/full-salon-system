@@ -36,7 +36,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { stockPhotos, serviceThumb } from "@/lib/stock-photos"
 import { serviceImageByName } from "@/lib/salon-services"
-import { SALON_PHONE, SALON_PHONE_DISPLAY, SALON_WHATSAPP } from "@/lib/salon-contact"
+import {
+  SALON_PHONE,
+  SALON_PHONE_DISPLAY,
+  WHATSAPP_MESSAGES,
+  whatsappLink,
+} from "@/lib/salon-contact"
 import { formatCurrency } from "@/lib/currency"
 import type { PaymentMethod, Service, Stylist } from "@/types"
 
@@ -483,7 +488,7 @@ export function BookingWizard() {
               {SALON_PHONE_DISPLAY}
             </a>
             <a
-              href={`https://wa.me/${SALON_WHATSAPP}`}
+              href={whatsappLink(WHATSAPP_MESSAGES.booking)}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2"

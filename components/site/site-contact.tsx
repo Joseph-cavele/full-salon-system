@@ -22,9 +22,11 @@ import { fadeUp } from "@/lib/motion"
 import {
   SALON_ADDRESS,
   SALON_EMAIL,
+  SALON_MAP_QUERY,
   SALON_PHONE,
   SALON_PHONE_DISPLAY,
-  SALON_WHATSAPP,
+  WHATSAPP_MESSAGES,
+  whatsappLink,
 } from "@/lib/salon-contact"
 import {
   contactMessageSchema,
@@ -34,23 +36,19 @@ import {
 } from "@/features/contact/schema"
 
 /* ══════════════════════════════════════════════════════════════════════
-   REAL-WORLD DETAILS — every value in this block is a public claim about
-   the business, and every one of them is currently unconfirmed. The
-   address drives the map pin and the directions link, so a wrong one
-   sends customers to the wrong street.
+   REAL-WORLD DETAILS — every value here is a public claim about the
+   business. The address drives the map pin and the directions link, so a
+   wrong one sends customers to the wrong street.
 
-   `SALON_ADDRESS` is deliberately a suburb, not a street address: the
-   site's own copy only ever claims "Kempton Park", so the map is honest
-   about showing the area rather than dropping a precise pin on a made-up
-   number. Replace it with the real street address and the map, the
-   directions link and the address line all follow.
+   All of it is imported, never re-declared. This file used to keep its own
+   copies alongside site-header.tsx's, which is how a placeholder number
+   survived here after the real one had been set.
 
-   The number and email are imported, not re-declared. This file used to
-   carry its own copies alongside site-header.tsx's, which is how a
-   placeholder number survived here after the real one was set.
+   The opening hours below are the exception — still unconfirmed, and still
+   the one thing on this page that could send someone to a locked door.
    ══════════════════════════════════════════════════════════════════════ */
 const PHONE = SALON_PHONE_DISPLAY
-const WHATSAPP = SALON_WHATSAPP
+const WHATSAPP = whatsappLink(WHATSAPP_MESSAGES.general)
 const EMAIL = SALON_EMAIL
 
 /* Matches the Settings model's default ("Mon–Sat: 9:00 AM – 8:00 PM").
@@ -71,7 +69,9 @@ const openingHours = [
    resolve to undefined here. The literal is the same default. */
 const SALON_TIMEZONE = "Africa/Johannesburg"
 
-const mapQuery = encodeURIComponent(SALON_ADDRESS)
+/* Shared, and built from the geocoder-friendly form rather than the printed
+   one — see SALON_MAP_ADDRESS for why the unit number is left out. */
+const mapQuery = SALON_MAP_QUERY
 
 /* Which row to highlight is a client-only fact — the server would have to
    guess, and a wrong guess is a hydration mismatch. `useSyncExternalStore`
@@ -480,7 +480,7 @@ export function SiteContact() {
                 </a>
 
                 <a
-                  href={`https://wa.me/${WHATSAPP}`}
+                  href={WHATSAPP}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-3 font-ui text-sm text-rose-muted transition-colors hover:text-rose-accent"

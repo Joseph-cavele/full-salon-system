@@ -14,7 +14,7 @@ const settingsSchema = new Schema(
        outside the app's module graph. */
     email: { type: String, default: "booking@patrickdreadlocks.co.za" },
     phone: { type: String, default: "074 780 9371" },
-    address: { type: String, default: "Kempton Park, Johannesburg, South Africa" },
+    address: { type: String, default: "Shop 7, 26 Park St, Kempton Park, Johannesburg" },
     openingHours: { type: String, default: "Mon–Sat: 9:00 AM – 8:00 PM" },
     notificationEmail: { type: String, default: "" },
     emailNotifications: { type: Boolean, default: true },
