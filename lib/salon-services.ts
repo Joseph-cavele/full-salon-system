@@ -287,12 +287,30 @@ export const serviceImageByName: Record<string, { image: string; alt: string }> 
     )
   )
 
-/** Recent work, for the gallery grid. No overlap with the cards above. */
+/**
+ * Recent work, for the gallery grid. No overlap with the cards above — the
+ * same photo in both places reads as a thin library rather than a curated one.
+ *
+ * The first four are the salon's own photographs. What was here before was
+ * stock, and it had two problems worth naming so they do not come back:
+ *
+ * Three of the six tiles were labelled "Nail Artistry", "Nail Design" and
+ * "Press-On Sets". There is no nail service anywhere in `serviceCategories` —
+ * the section headed "Our work" was advertising work the salon does not sell,
+ * on a page whose own booking flow offers no way to buy it.
+ *
+ * And not one tile showed locs, on the site of a business called Patrick
+ * Dreadlocks. The gallery led with cuts, beards and nails while the actual
+ * speciality appeared nowhere in it.
+ *
+ * The two cut/barber tiles are kept: `Hair Cut Only` and `Hair Cut & Dye` are
+ * real services, so those tiles are honest.
+ */
 export const galleryItems = [
+  { src: "/Assets/locs-retwist-parting.webp", label: "Retwist & Parting" },
+  { src: "/Assets/locs-updo-pinwheel.webp", label: "Loc Updo" },
+  { src: "/Assets/locs-barrel-styling.webp", label: "Barrel Styling" },
+  { src: "/Assets/locs-bob-beads.webp", label: "Loc Bob" },
   { src: "/Assets/9c4da6a37816c126b2dda8d8d62c9486.jpg", label: "Cuts & Beards" },
-  { src: "/Assets/0c0b1644a0cc29d0cd0db603f34d5b7f.jpg", label: "Nail Artistry" },
   { src: "/Assets/b8e7674c6ebad42e6a4f79bb3b5d7055.jpg", label: "Barbering" },
-  { src: "/Assets/9b9bed10c73cbff86d8c17b3b2fc36f3.jpg", label: "Nail Design" },
-  { src: "/Assets/15b587feda7162d924095f282f60059e.jpg", label: "Grooming" },
-  { src: "/Assets/66bb64901b805bae731095695b0484e7.jpg", label: "Press-On Sets" },
 ]

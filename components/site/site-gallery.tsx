@@ -40,8 +40,10 @@ export function SiteGallery() {
             variants={fadeUp(reduce, 0, 20)}
             className="mx-auto mt-4 max-w-md font-ui text-sm leading-[1.7] text-rose-muted sm:text-base"
           >
-            Locs, braids, cuts and nails — finished in the chair, photographed
-            the same day.
+            {/* Said "Locs, braids, cuts and nails" while the grid showed no
+                locs at all and the salon sells no nail service. */}
+            Locs retwisted, styled and maintained — plus cuts, finished in the
+            chair and photographed the same day.
           </motion.p>
         </motion.div>
 
