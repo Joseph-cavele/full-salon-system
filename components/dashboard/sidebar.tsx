@@ -1,24 +1,16 @@
-"use client"
+﻿"use client"
 
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { signOut } from "next-auth/react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import NextImage from "next/image"
-import { ChevronsUpDown, LogOut, X } from "lucide-react"
+import { LogOut, X } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useNotifications } from "@/features/notifications/hooks/use-notifications"
 import { useDashboardNav } from "@/components/dashboard/dashboard-nav-context"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { navItems } from "@/components/dashboard/nav-items"
 
 function initials(name?: string | null) {
@@ -96,7 +88,15 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
   )
 }
 
-function SidebarUserMenu({
+/**
+ * Who is signed in. Plain text, not a menu.
+ *
+ * This was a dropdown whose only action was "Sign out". With that promoted to
+ * a button of its own below, the menu had nothing left to open — so the email
+ * it used to hide behind a click is simply shown, which is the thing you
+ * actually want when checking whose session you are looking at.
+ */
+function SidebarUser({
   name,
   email,
 }: {
@@ -104,29 +104,48 @@ function SidebarUserMenu({
   email?: string | null
 }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center gap-2 border-t border-sidebar-border p-3 text-left outline-none hover:bg-sidebar-accent">
-        <Avatar className="size-8">
-          <AvatarFallback>{initials(name)}</AvatarFallback>
-        </Avatar>
-        <div className="flex flex-1 flex-col leading-none">
-          <span className="text-sm font-medium">{name ?? "Admin"}</span>
-          <span className="text-xs text-sidebar-foreground/60">Admin</span>
-        </div>
-        <ChevronsUpDown className="size-4 text-sidebar-foreground/50" />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" side="top" className="w-52">
-        <DropdownMenuLabel className="flex flex-col">
-          <span className="font-medium">{name}</span>
-          <span className="text-xs font-normal text-muted-foreground">{email}</span>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={() => signOut({ callbackUrl: "/login" })}>
-          <LogOut className="size-4" />
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center gap-2 border-t border-sidebar-border p-3">
+      <Avatar className="size-8">
+        <AvatarFallback>{initials(name)}</AvatarFallback>
+      </Avatar>
+      <div className="flex min-w-0 flex-1 flex-col leading-tight">
+        <span className="truncate text-sm font-medium">{name ?? "Admin"}</span>
+        <span className="truncate text-xs text-sidebar-foreground/60">
+          {email ?? "Admin"}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Sign out, in one click.
+ *
+ * The action already existed behind the user card's dropdown here and behind
+ * the topbar avatar's, but both need a click to discover before the click
+ * that does the thing — on a shared salon machine, logging out is something
+ * you want to be able to do on the way out the door.
+ *
+ * The pending state matters more than it looks: `signOut` posts to the auth
+ * endpoint and only then redirects, so on a slow connection the button would
+ * otherwise sit there looking untouched and invite a second press.
+ */
+function SidebarSignOut() {
+  const [pending, setPending] = useState(false)
+
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      onClick={() => {
+        setPending(true)
+        signOut({ callbackUrl: "/login" })
+      }}
+      className="flex items-center gap-2 border-t border-sidebar-border px-4 py-3 text-left text-sm font-medium text-sidebar-foreground/75 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground focus-visible:bg-sidebar-accent focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+    >
+      <LogOut className="size-4 shrink-0" aria-hidden />
+      {pending ? "Signing out…" : "Sign out"}
+    </button>
   )
 }
 
@@ -153,7 +172,8 @@ export function Sidebar({
           <SidebarBrand />
         </div>
         <SidebarNav />
-        <SidebarUserMenu name={name} email={email} />
+        <SidebarUser name={name} email={email} />
+        <SidebarSignOut />
       </aside>
 
       {/* Mobile drawer */}
@@ -171,7 +191,8 @@ export function Sidebar({
               </DialogPrimitive.Close>
             </div>
             <SidebarNav onNavigate={() => setMobileNavOpen(false)} />
-            <SidebarUserMenu name={name} email={email} />
+            <SidebarUser name={name} email={email} />
+            <SidebarSignOut />
           </DialogPrimitive.Popup>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
