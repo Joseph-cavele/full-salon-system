@@ -70,8 +70,19 @@ export type SalonSocial = {
 }
 
 export const SALON_SOCIALS: SalonSocial[] = [
-  { label: "Facebook", url: "" },
-  { label: "Instagram", url: "" },
+  /* Canonical form of the page URL. The link as supplied was
+     `web.facebook.com/patrickdreadlocksa/?_rdc=1&_rdr#`, which is what the
+     address bar shows after Facebook's own redirect — `_rdc`/`_rdr` are its
+     redirect bookkeeping and `web.` is a regional host. Neither belongs in
+     a link we publish: the query string is meaningless to anyone arriving
+     fresh, and `www.` resolves everywhere. */
+  { label: "Facebook", url: "https://www.facebook.com/patrickdreadlocksa" },
+  /* Same treatment: the supplied link carried an `fbclid=IwY2xjawTierxw…`
+     tracking token, ~180 characters of Facebook click ID picked up by
+     whatever shared the link. It identifies the click that produced the
+     copy, not the profile, and publishing it would attach that token to
+     every visitor who followed it from the footer. */
+  { label: "Instagram", url: "https://www.instagram.com/patrickdreadlocksa" },
   { label: "TikTok", url: "" },
 ]
 
