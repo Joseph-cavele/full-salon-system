@@ -89,8 +89,12 @@ export const featuredServices: FeaturedService[] = [
     from: "From R1,000",
     description:
       "Starting your locs from scratch with the crochet method, sectioned and installed to grow evenly for years.",
-    image: "/Assets/1e60d50b163af6c4acf12122730c6865.jpg",
-    alt: "Stylist installing locs for a client in the chair",
+    /* The salon's own photograph, from /public/Replace. Shows a finished
+       head of locs rather than the work in progress the previous shot did —
+       which is what someone deciding whether to book an installation is
+       actually trying to picture. */
+    image: "/Assets/locs-long-gold-cuffs.webp",
+    alt: "Long locs dressed with gold cuffs and thread, gathered into a half-up bun",
   },
   {
     name: "Dreadlocks Detox",
