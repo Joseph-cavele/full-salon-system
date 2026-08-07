@@ -1,4 +1,7 @@
-import { SALON_EMAIL } from "@/lib/salon-contact"
+import type { IconType } from "react-icons"
+import { FaFacebookF, FaInstagram, FaTiktok } from "react-icons/fa6"
+
+import { SALON_EMAIL, SALON_SOCIALS } from "@/lib/salon-contact"
 
 const footerLinks = [
   { label: "Privacy Policy", href: "#" },
@@ -6,6 +9,23 @@ const footerLinks = [
   { label: "Careers", href: "#" },
   { label: "Contact", href: `mailto:${SALON_EMAIL}` },
 ]
+
+/* Brand marks come from react-icons: lucide v1 dropped its brand set, so
+   Facebook and Instagram resolve to undefined there and TikTok never
+   existed. Keyed by the label in SALON_SOCIALS — a platform added there
+   without an icon here is skipped rather than rendering an empty box. */
+const socialIcons: Record<string, IconType> = {
+  Facebook: FaFacebookF,
+  Instagram: FaInstagram,
+  TikTok: FaTiktok,
+}
+
+/* Every platform we have a mark for. Whether it links anywhere is decided
+   per-item below, not here. */
+const socials = SALON_SOCIALS.filter((s) => socialIcons[s.label])
+
+const socialClass =
+  "grid size-9 place-items-center rounded-full border transition-colors duration-300"
 
 /* Deep charcoal-plum, matching the hero's glass card, so the pale pink body has
    something to close against. Single skin — the header dropped its two-tone
@@ -23,6 +43,48 @@ export function SiteFooter() {
           <span className="mt-1.5 font-ui text-[10px] font-semibold tracking-[0.3em] text-rose-accent uppercase">
             Dreadlocks &amp; Beauty
           </span>
+
+          {socials.length > 0 && (
+            <ul className="mt-6 flex items-center gap-3">
+              {socials.map(({ label, url }) => {
+                const Icon = socialIcons[label]
+
+                /* No URL yet: the mark still shows so the row reads as
+                   finished, but as a span rather than an anchor. An <a> with
+                   an empty href resolves to the current page, so clicking it
+                   would silently reload the homepage — which looks like a
+                   broken site rather than a profile that isn't live. */
+                if (!url) {
+                  return (
+                    <li key={label}>
+                      <span
+                        role="img"
+                        aria-label={`${label} — coming soon`}
+                        title={`${label} — coming soon`}
+                        className={`${socialClass} cursor-default border-rose-ground/10 text-rose-ground/30`}
+                      >
+                        <Icon className="size-4" aria-hidden />
+                      </span>
+                    </li>
+                  )
+                }
+
+                return (
+                  <li key={label}>
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`Patrick Dreadlocks & Beauty on ${label}`}
+                      className={`${socialClass} border-rose-ground/20 text-rose-ground/70 hover:border-rose-accent hover:bg-rose-accent hover:text-rose-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-accent`}
+                    >
+                      <Icon className="size-4" aria-hidden />
+                    </a>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
         </div>
 
         <div className="mb-8 flex flex-wrap justify-center gap-8 md:mb-0">

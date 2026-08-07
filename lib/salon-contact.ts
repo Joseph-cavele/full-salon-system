@@ -50,6 +50,32 @@ export const SALON_MAP_ADDRESS = "26 Park St, Kempton Park, Johannesburg, South 
 export const SALON_MAP_QUERY = encodeURIComponent(SALON_MAP_ADDRESS)
 
 /**
+ * The salon's social profiles.
+ *
+ * A URL here is a public claim in the same way the phone number is, and a
+ * wrong one is worse than a missing one: a guessed handle does not 404, it
+ * sends customers to a stranger's page that looks like it could be the
+ * salon's. So they start empty and get filled in with real ones.
+ *
+ * The icons still show while a URL is blank — the footer renders that one as
+ * an inert mark rather than a link, so the row looks complete without
+ * promising a destination that isn't there. Set `url` to the full profile
+ * URL (not the handle) and it becomes a working link with no other change.
+ */
+export type SalonSocial = {
+  /** Used as the accessible name: "Patrick Dreadlocks & Beauty on Facebook". */
+  label: string
+  /** Full profile URL. Empty means "not set up yet" — the link is not shown. */
+  url: string
+}
+
+export const SALON_SOCIALS: SalonSocial[] = [
+  { label: "Facebook", url: "" },
+  { label: "Instagram", url: "" },
+  { label: "TikTok", url: "" },
+]
+
+/**
  * Opening lines for the WhatsApp links, written from the customer's side —
  * `?text=` prefills the customer's compose box, so anything here is words
  * they are about to appear to have said. Kept short and easy to type over
