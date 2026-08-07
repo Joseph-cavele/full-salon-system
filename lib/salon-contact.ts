@@ -83,17 +83,16 @@ export const SALON_SOCIALS: SalonSocial[] = [
      copy, not the profile, and publishing it would attach that token to
      every visitor who followed it from the footer. */
   { label: "Instagram", url: "https://www.instagram.com/patrickdreadlocksa" },
-  /* A `vt.tiktok.com` share shortener, as supplied (minus a stray space).
-     Unlike the two above this could not be reduced to a canonical URL:
-     resolving it from the server lands on TikTok's homepage, which is their
-     bot handling rather than a dead link, so the destination could not be
-     confirmed from here.
+  /* The profile itself, replacing the `vt.tiktok.com` shortener this
+     started as — a shortener is a hop the platform can retire, and it tells
+     a visitor hovering the icon nothing about where they are going.
 
-     Worth replacing with the profile's own `https://www.tiktok.com/@handle`
-     when someone can read it off the app. A shortener is an extra hop that
-     can be retired by the platform, and it tells a visitor hovering the
-     icon nothing about where they are going. */
-  { label: "TikTok", url: "https://vt.tiktok.com/ZS44MHgl6/" },
+     `?_r=1&_t=ZS-98gEngGF9Yq` stripped: TikTok's share parameters, which
+     identify the share that produced the copy rather than the profile.
+
+     Note the handle does not match the other two — @ikponmwosaobasogi
+     rather than patrickdreadlocksa. Confirmed as correct by the owner. */
+  { label: "TikTok", url: "https://www.tiktok.com/@ikponmwosaobasogi" },
 ]
 
 /**

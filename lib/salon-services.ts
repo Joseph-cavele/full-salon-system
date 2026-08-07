@@ -117,8 +117,8 @@ export const featuredServices: FeaturedService[] = [
     from: "From R500",
     description:
       "Shoulder-length braids with curled ends — lighter on the scalp and quicker to install than a full set.",
-    image: "/Assets/23a95aa64290b8bac7bf047bfe12245c.jpg",
-    alt: "Shoulder-length braids finished with curled ends",
+    image: "/Assets/braids-boho-bob-curled-ends.webp",
+    alt: "Knotless bob-length braids with loose curled ends framing the face",
   },
   {
     name: "Pixie Cut",
@@ -133,8 +133,8 @@ export const featuredServices: FeaturedService[] = [
     from: "R400",
     description:
       "Secure, natural-looking installation with the hairline blended and the unit styled before you leave.",
-    image: "/Assets/e912566638f34e2477dd703b48d238ab.jpg",
-    alt: "Finished lace-front wig install styled in soft waves",
+    image: "/Assets/wig-straight-lace-front.webp",
+    alt: "Long straight lace-front install with the hairline blended, and an inset close-up of the parting",
   },
 ]
 
