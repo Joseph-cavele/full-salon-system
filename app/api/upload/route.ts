@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { uploadImage } from "@/lib/cloudinary"
+import { uploadImage, UPLOAD_FOLDERS, type UploadFolder } from "@/lib/cloudinary"
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const MAX_SIZE = 5 * 1024 * 1024
@@ -26,11 +26,21 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  /* Unrecognised values fall back to `hairstyles` rather than being rejected:
+     the folder only decides where the file is filed, so a bad one is not
+     worth failing an otherwise valid upload over. Validated against the map
+     rather than trusted, so the request cannot name an arbitrary path. */
+  const requested = formData.get("folder")
+  const folder: UploadFolder =
+    typeof requested === "string" && requested in UPLOAD_FOLDERS
+      ? (requested as UploadFolder)
+      : "hairstyles"
+
   const buffer = Buffer.from(await file.arrayBuffer())
   const base64 = `data:${file.type};base64,${buffer.toString("base64")}`
 
   try {
-    const url = await uploadImage(base64)
+    const url = await uploadImage(base64, folder)
     return NextResponse.json({ url })
   } catch {
     return NextResponse.json({ error: "Image upload failed" }, { status: 500 })

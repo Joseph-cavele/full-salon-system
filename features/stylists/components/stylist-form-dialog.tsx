@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { ImageUploadField } from "@/components/dashboard/image-upload-field"
 import type { Stylist } from "@/types"
 
 export function StylistFormDialog({
@@ -43,6 +44,7 @@ export function StylistFormDialog({
     email: stylist?.email ?? "",
     phone: stylist?.phone ?? "",
     bio: stylist?.bio ?? "",
+    image: stylist?.image ?? "",
     workingHours: stylist?.workingHours ?? "",
     active: stylist?.active ?? true,
     services: stylist?.services.map((s) => s.id) ?? [],
@@ -107,6 +109,24 @@ export function StylistFormDialog({
             <Field>
               <FieldLabel htmlFor="stylist-bio">Bio</FieldLabel>
               <Textarea id="stylist-bio" {...register("bio")} />
+            </Field>
+            <Field>
+              <Controller
+                control={control}
+                name="image"
+                render={({ field }) => (
+                  <ImageUploadField
+                    label="Portrait"
+                    aspect="square"
+                    folder="stylists"
+                    description="Shown when customers pick a stylist. JPG, PNG or WEBP, up to 5MB."
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={isPending}
+                  />
+                )}
+              />
+              {errors.image && <FieldError>{errors.image.message}</FieldError>}
             </Field>
             <Field>
               <FieldLabel htmlFor="stylist-hours">Working hours</FieldLabel>

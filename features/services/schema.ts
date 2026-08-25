@@ -33,6 +33,15 @@ export const serviceInputSchema = z.object({
   price: z.number().positive("Price must be greater than 0"),
   duration: z.number().int().positive("Duration must be greater than 0"),
   category: z.enum(SERVICE_CATEGORIES),
+  /* The Service model has always had an `image` field, but it was absent
+     here — and since both API routes persist `parsed.data`, anything not in
+     this schema was silently dropped on the way to the database. A photo
+     could not be saved at all until this line existed.
+
+     `""` is allowed alongside a URL so the field can be cleared: an empty
+     string round-trips to the model as "no image", where `undefined` would
+     leave the previous URL in place on an update. */
+  image: z.string().trim().url("Enter a valid image URL").or(z.literal("")).optional(),
 })
 
 export type ServiceInputValues = z.infer<typeof serviceInputSchema>

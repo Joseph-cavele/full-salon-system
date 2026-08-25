@@ -31,6 +31,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { ImageUploadField } from "@/components/dashboard/image-upload-field"
 import type { Service } from "@/types"
 
 type ServiceCategory = (typeof SERVICE_CATEGORIES)[number]
@@ -69,6 +70,7 @@ export function ServiceFormDialog({
       price: service?.price ?? 0,
       duration: service?.duration ?? 30,
       category: toCategory(service?.category),
+      image: service?.image ?? "",
     },
   })
 
@@ -80,6 +82,7 @@ export function ServiceFormDialog({
         price: service?.price ?? 0,
         duration: service?.duration ?? 30,
         category: toCategory(service?.category),
+        image: service?.image ?? "",
       })
     }
   }, [open, service, reset])
@@ -116,6 +119,24 @@ export function ServiceFormDialog({
               <FieldLabel htmlFor="service-description">Description</FieldLabel>
               <Textarea id="service-description" {...register("description")} />
               {errors.description && <FieldError>{errors.description.message}</FieldError>}
+            </Field>
+            <Field>
+              <Controller
+                control={control}
+                name="image"
+                render={({ field }) => (
+                  <ImageUploadField
+                    label="Service photo"
+                    aspect="wide"
+                    folder="services"
+                    description="Shown on the booking page. JPG, PNG or WEBP, up to 5MB."
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={isPending}
+                  />
+                )}
+              />
+              {errors.image && <FieldError>{errors.image.message}</FieldError>}
             </Field>
             <Field>
               <FieldLabel>Category</FieldLabel>
