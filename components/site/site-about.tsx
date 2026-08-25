@@ -28,7 +28,7 @@ const VIDEO_SRC = ""
    headcount it does not have, is not a placeholder — it's a false claim.
    ══════════════════════════════════════════════════════════════════════ */
 const SINCE = "2019"
-const YEARS = "5+"
+const YEARS = "10+"
 
 const stats = [
   { icon: UserRound, value: YEARS, label: "Years Experience" },
