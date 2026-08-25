@@ -109,8 +109,8 @@ export const featuredServices: FeaturedService[] = [
     from: "From R800",
     description:
       "Knotless braids installed with even tension, sized and parted to sit comfortably for weeks.",
-    image: "/Assets/e58c67cde794d63ac80d12159571bfcd.jpg",
-    alt: "Feed-in braids gathered into a long braided bun",
+    image: "/Assets/braids-long-boho-highlights.webp",
+    alt: "Waist-length knotless braids with caramel highlights and loose curled ends",
   },
   {
     name: "Short Braids",
