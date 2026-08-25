@@ -44,24 +44,30 @@ import {
    copies alongside site-header.tsx's, which is how a placeholder number
    survived here after the real one had been set.
 
-   The opening hours below are the exception — still unconfirmed, and still
-   the one thing on this page that could send someone to a locked door.
+   The opening hours below were the last unconfirmed thing here. The salon
+   trades around the clock, so every day now reads the same.
    ══════════════════════════════════════════════════════════════════════ */
 const PHONE = SALON_PHONE_DISPLAY
 const WHATSAPP = whatsappLink(WHATSAPP_MESSAGES.general)
 const EMAIL = SALON_EMAIL
 
-/* Matches the Settings model's default ("Mon–Sat: 9:00 AM – 8:00 PM").
-   Confirm before publishing — a customer who arrives to a locked door
-   because this said otherwise is a real cost. */
+/* Open 24/7, so every row reads the same. Kept as seven rows rather than
+   collapsed to one line because the list highlights the current day, which
+   still tells a visitor the page knows what day it is — and because a day
+   that stops being 24-hour then only needs its own row edited.
+
+   Nothing parses these strings except the `=== "Closed"` check that greys a
+   row out, so a day can go back to real hours by editing it here. Keep
+   lib/models/Settings.ts in step; it carries the same claim for the
+   dashboard. */
 const openingHours = [
-  { day: "Monday", hours: "09:00 – 20:00" },
-  { day: "Tuesday", hours: "09:00 – 20:00" },
-  { day: "Wednesday", hours: "09:00 – 20:00" },
-  { day: "Thursday", hours: "09:00 – 20:00" },
-  { day: "Friday", hours: "09:00 – 20:00" },
-  { day: "Saturday", hours: "09:00 – 20:00" },
-  { day: "Sunday", hours: "Closed" },
+  { day: "Monday", hours: "Open 24 hours" },
+  { day: "Tuesday", hours: "Open 24 hours" },
+  { day: "Wednesday", hours: "Open 24 hours" },
+  { day: "Thursday", hours: "Open 24 hours" },
+  { day: "Friday", hours: "Open 24 hours" },
+  { day: "Saturday", hours: "Open 24 hours" },
+  { day: "Sunday", hours: "Open 24 hours" },
 ]
 
 /* Hardcoded rather than read from lib/date.ts: SALON_TIMEZONE has no

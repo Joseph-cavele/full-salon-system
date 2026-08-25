@@ -15,7 +15,7 @@ const settingsSchema = new Schema(
     email: { type: String, default: "booking@patrickdreadlocks.co.za" },
     phone: { type: String, default: "074 780 9371" },
     address: { type: String, default: "Shop 7, 26 Park St, Kempton Park, Johannesburg" },
-    openingHours: { type: String, default: "Mon–Sat: 9:00 AM – 8:00 PM" },
+    openingHours: { type: String, default: "Open 24 hours, 7 days a week" },
     notificationEmail: { type: String, default: "" },
     emailNotifications: { type: Boolean, default: true },
   },
