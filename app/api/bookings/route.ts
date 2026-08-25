@@ -11,6 +11,7 @@ import { createBookingSchema } from "@/features/bookings/schema"
 import { getBookings } from "@/features/bookings/server/get-bookings"
 import { resend } from "@/lib/resend"
 import { newBookingOwnerEmailHtml } from "@/emails/new-booking-owner"
+import { appointmentConfirmedEmailHtml } from "@/emails/appointment-confirmed"
 import type { BookingStatus } from "@/types"
 
 export async function GET(req: NextRequest) {
@@ -82,9 +83,11 @@ export async function POST(req: NextRequest) {
     amount,
     paymentMethod,
     paymentStatus: "UNPAID",
-    /* Paying in person is a normal request the salon then confirms. Paying
-       online holds the slot but confirms nothing until Paystack settles. */
-    status: payingOnline ? "PENDING_PAYMENT" : "PENDING",
+    /* Booking in person confirms the slot immediately — the salon no longer
+       reviews each request by hand. Paying online still holds the slot and
+       confirms nothing until Paystack settles, because there the money, not
+       the salon, is what the booking is waiting on. */
+    status: payingOnline ? "PENDING_PAYMENT" : "CONFIRMED",
   })
 
   if (imageUrls.length > 0) {
@@ -93,19 +96,54 @@ export async function POST(req: NextRequest) {
     )
   }
 
+  /* "Booked", not "requested" — the dashboard notification used to be a
+     prompt to go and act on something. Now it is a heads-up about a slot
+     that is already taken. */
   if (!payingOnline) await NotificationModel.create({
-    title: "New Booking Request",
-    message: `${customerName} requested an appointment with ${stylist.name}`,
+    title: "New Booking",
+    message: `${customerName} booked an appointment with ${stylist.name}`,
     bookingId: booking._id,
     read: false,
   })
+
+  /* The customer's confirmation.
+     Previously this went out when the owner pressed Confirm on the dashboard
+     (see app/api/bookings/[id]/route.ts, which still sends it for a status
+     changed by hand). With the booking confirmed on creation there is no
+     such press, so without this the customer would be told nothing at all —
+     the booking would be confirmed in the database and silent to the person
+     who made it.
+
+     Best-effort, like every other send here: the slot is taken whether or
+     not the mail lands, and failing the request would tell the customer
+     their booking did not happen when it did. */
+  if (!payingOnline && resend && customerEmail) {
+    try {
+      const { error } = await resend.emails.send({
+        from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
+        to: customerEmail,
+        subject: "Your appointment is booked & confirmed",
+        html: appointmentConfirmedEmailHtml({
+          customerName,
+          stylistName: stylist.name,
+          serviceNames: services.map((s) => s.name),
+          bookingDate,
+          bookingTime,
+        }),
+      })
+      // Resend reports rejections on the result rather than throwing.
+      if (error) console.error("Customer confirmation email rejected by Resend:", error)
+    } catch (err) {
+      console.error("Failed to send customer confirmation email", err)
+    }
+  }
 
   if (!payingOnline && resend && process.env.OWNER_EMAIL) {
     try {
       await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
         to: process.env.OWNER_EMAIL,
-        subject: "New Booking Request",
+        subject: "New Booking — Confirmed",
         html: newBookingOwnerEmailHtml({
           customerName,
           customerEmail,

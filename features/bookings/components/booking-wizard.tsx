@@ -244,12 +244,16 @@ export function BookingWizard() {
         <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-rose-accent/15 text-rose-accent">
           <Check className="size-7" />
         </span>
+        {/* Only the in-person path reaches this screen — the online one hands
+            off to Paystack before it. In-person bookings confirm on creation,
+            so this no longer promises a confirmation that is still coming;
+            it reports one that has already happened. */}
         <h2 className="mt-5 font-display text-2xl font-semibold text-rose-ink">
-          Your appointment is booked!
+          Your appointment is confirmed!
         </h2>
         <p className="mt-2 text-sm text-rose-muted">
-          We&apos;ve received your request and will confirm your appointment
-          shortly by email.
+          The slot is yours — a confirmation email is on its way. Payment is
+          due at the salon.
         </p>
         <button
           type="button"
@@ -727,8 +731,17 @@ function StaffStep({
               )}
             >
               <Avatar size="lg" className="size-12">
+                {/* The stylist's own photo wins. The stock array behind it is
+                    positional — `[i % length]` — so it hands whichever face
+                    sits at that index to whoever is standing in that slot.
+                    That is harmless for interchangeable stock, but it would
+                    put a real person's photograph under a different
+                    stylist's name, which the alt text then states as fact.
+                    A real photo therefore belongs on the Stylist document,
+                    not in the fallback pool. */}
                 <AvatarImage
                   src={
+                    stylist.image ||
                     stockPhotos.stylistHeadshots[i % stockPhotos.stylistHeadshots.length]
                   }
                   alt={stylist.name}
