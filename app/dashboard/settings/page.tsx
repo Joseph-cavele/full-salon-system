@@ -1,6 +1,6 @@
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query"
-import { auth } from "@/auth"
 import { getQueryClient } from "@/lib/get-query-client"
+import { requireOwner } from "@/features/auth/server/session"
 import { getSettings } from "@/features/settings/server/get-settings"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -18,11 +18,10 @@ function initials(name?: string | null) {
 }
 
 export default async function DashboardSettingsPage() {
+  const owner = await requireOwner()
+
   const queryClient = getQueryClient()
-  const [session] = await Promise.all([
-    auth(),
-    queryClient.prefetchQuery({ queryKey: ["settings"], queryFn: getSettings }),
-  ])
+  await queryClient.prefetchQuery({ queryKey: ["settings"], queryFn: getSettings })
 
   return (
     <div className="flex flex-col gap-6 p-4 sm:p-6">
@@ -45,18 +44,18 @@ export default async function DashboardSettingsPage() {
           <CardContent className="flex flex-col gap-4">
             <div className="flex items-center gap-3">
               <Avatar className="size-10">
-                <AvatarFallback>{initials(session?.user?.name)}</AvatarFallback>
+                <AvatarFallback>{initials(owner.name)}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col leading-tight">
-                <span className="font-medium">{session?.user?.name ?? "Admin"}</span>
+                <span className="font-medium">{owner.name}</span>
                 <span className="text-sm text-muted-foreground">
-                  {session?.user?.email}
+                  {owner.email}
                 </span>
               </div>
             </div>
             <div className="flex items-center justify-between rounded-lg bg-muted/50 px-3 py-2 text-sm">
               <span className="text-muted-foreground">Role</span>
-              <span className="font-medium capitalize">{session?.user?.role}</span>
+              <span className="font-medium">Owner</span>
             </div>
             <SignOutButton />
           </CardContent>

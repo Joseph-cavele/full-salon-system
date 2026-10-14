@@ -37,3 +37,14 @@ export async function getSettings(): Promise<SalonSettings | null> {
 
   return settings ? serializeSettings(settings) : null
 }
+
+/**
+ * Where new-booking alerts go: the dashboard's "Booking notification email"
+ * if set, otherwise OWNER_EMAIL. Null when the owner has switched email
+ * notifications off in Settings, or no address is configured at all.
+ */
+export async function getBookingAlertEmail(): Promise<string | null> {
+  const settings = await getSettings()
+  if (settings && !settings.emailNotifications) return null
+  return settings?.notificationEmail.trim() || process.env.OWNER_EMAIL?.trim() || null
+}

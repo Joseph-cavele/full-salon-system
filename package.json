@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "tsx scripts/seed.ts",
-    "reset-password": "tsx scripts/reset-password.ts",
+    "setup-owner": "tsx scripts/setup-owner.ts",
     "sync-indexes": "tsx scripts/sync-indexes.ts"
   },
   "dependencies": {

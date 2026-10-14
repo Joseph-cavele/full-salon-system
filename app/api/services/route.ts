@@ -4,6 +4,7 @@ import { connectDB } from "@/lib/db"
 import { ServiceModel } from "@/lib/models/Service"
 import { serviceInputSchema } from "@/features/services/schema"
 import { getServices } from "@/features/services/server/get-services"
+import { denyUnlessOwner } from "@/features/auth/server/session"
 
 export async function GET() {
   const services = await getServices()
@@ -11,6 +12,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await denyUnlessOwner()
+  if (denied) return denied
+
   const body = await req.json()
   const parsed = serviceInputSchema.safeParse(body)
 

@@ -1,9 +1,12 @@
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query"
 import { getQueryClient } from "@/lib/get-query-client"
+import { requireOwner } from "@/features/auth/server/session"
 import { getServices } from "@/features/services/server/get-services"
 import { ServicesManagement } from "@/features/services/components/services-management"
 
 export default async function DashboardServicesPage() {
+  await requireOwner()
+
   const queryClient = getQueryClient()
 
   await queryClient.prefetchQuery({

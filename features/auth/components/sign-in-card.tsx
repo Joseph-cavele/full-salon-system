@@ -1,30 +1,75 @@
 "use client"
 
 import { useState } from "react"
-import { getSession, signIn } from "next-auth/react"
+import { signIn } from "next-auth/react"
 import { useSearchParams } from "next/navigation"
+import { isAxiosError } from "axios"
 import { toast } from "sonner"
 
 import { SignInCard2 } from "@/components/ui/sign-in-card-2"
-import { loginSchema } from "@/features/auth/schema"
+import { apiClient } from "@/lib/api-client"
+import { requestCodeSchema, verifyCodeSchema } from "@/features/auth/schema"
 
 /**
- * Auth wiring for the glass sign-in card.
+ * Auth wiring for the glass sign-in card — passwordless, in two steps:
  *
- * Mirrors `login-form.tsx` — same next-auth credentials flow and the same hard
- * navigation on success — but validates with `loginSchema` directly instead of
- * react-hook-form, because the card owns its own field state.
+ *   1. email → POST /api/login-code emails a 6-digit code
+ *   2. code  → next-auth's credentials provider (auth.ts) checks it
+ *
+ * The card is presentational; this component owns which step is showing and
+ * the address the code went to. Messages stay generic on purpose: nothing
+ * here says whether an address has an account.
  */
+
+/** Only same-site paths, so a crafted ?callbackUrl= can't bounce the owner off-site. */
+function safeCallbackUrl(value: string | null) {
+  return value && value.startsWith("/") && !value.startsWith("//") && !value.includes("\\")
+    ? value
+    : "/dashboard"
+}
 export function SignInCard() {
   const searchParams = useSearchParams()
+  const [step, setStep] = useState<"email" | "code">("email")
+  const [sentTo, setSentTo] = useState<string | null>(null)
+  const [codeSentAt, setCodeSentAt] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
 
-  async function handleSubmit({ email, password }: { email: string; password: string }) {
-    const parsed = loginSchema.safeParse({ email, password })
+  async function handleRequestCode(rawEmail: string) {
+    const parsed = requestCodeSchema.safeParse({ email: rawEmail })
     if (!parsed.success) {
-      const message = parsed.error.issues[0]?.message ?? "Please check your details."
+      setFormError(parsed.error.issues[0]?.message ?? "Please check your email address.")
+      return
+    }
+
+    setIsSubmitting(true)
+    setFormError(null)
+
+    try {
+      await apiClient.post("/login-code", parsed.data)
+    } catch (err) {
+      const message =
+        (isAxiosError(err) && err.response?.data?.error) ||
+        "Something went wrong while sending your code. Please try again."
       setFormError(message)
+      toast.error(message)
+      setIsSubmitting(false)
+      return
+    }
+
+    // The server answers the same for unknown addresses, so this wording
+    // can't promise an account exists.
+    setSentTo(parsed.data.email)
+    setCodeSentAt(Date.now())
+    setStep("code")
+    setIsSubmitting(false)
+    toast.success("If that email is registered, a 6-digit code is on its way.")
+  }
+
+  async function handleVerifyCode(rawCode: string) {
+    const parsed = verifyCodeSchema.safeParse({ email: sentTo ?? "", code: rawCode })
+    if (!parsed.success) {
+      setFormError(parsed.error.issues[0]?.message ?? "Please check the code.")
       return
     }
 
@@ -36,7 +81,7 @@ export function SignInCard() {
       result = await signIn("credentials", { ...parsed.data, redirect: false })
     } catch (err) {
       // Thrown here means the request itself failed (server/DB unreachable),
-      // not just wrong credentials — surface a distinct message.
+      // not just a wrong code — surface a distinct message.
       const message =
         err instanceof Error && err.message
           ? err.message
@@ -47,26 +92,20 @@ export function SignInCard() {
       return
     }
 
-    // next-auth returns { error, ok } for a failed sign-in (invalid creds).
+    // next-auth returns { error, code, ok } for a failed sign-in.
     if (result?.error || result?.ok === false) {
-      setFormError("Invalid email or password. Please try again.")
-      toast.error("Invalid email or password")
+      const message =
+        result?.code === "rate_limited"
+          ? "Too many attempts. Please wait a few minutes and try again."
+          : "That code didn't work. Check it, or send a new one."
+      setFormError(message)
+      toast.error(message)
       setIsSubmitting(false)
       return
     }
 
-    // Login succeeded and the session cookie is set. Pick where to land —
-    // fetching the session is best-effort and must NOT block the redirect or
-    // it would look like a failed login even though the cookie is valid.
-    let target = searchParams.get("callbackUrl")
-    if (!target) {
-      try {
-        const session = await getSession()
-        target = session?.user?.role === "stylist" ? "/stylist" : "/dashboard"
-      } catch {
-        target = "/dashboard"
-      }
-    }
+    // Signed in — only the owner can be, so the dashboard is the destination.
+    const target = safeCallbackUrl(searchParams.get("callbackUrl"))
 
     // Hard navigation so the server sees the freshly-set session cookie.
     // A client-side router.push here can be bounced back to /login because the
@@ -75,5 +114,21 @@ export function SignInCard() {
     window.location.assign(target)
   }
 
-  return <SignInCard2 onSubmit={handleSubmit} isLoading={isSubmitting} error={formError} />
+  function handleChangeEmail() {
+    setStep("email")
+    setFormError(null)
+  }
+
+  return (
+    <SignInCard2
+      step={step}
+      sentTo={sentTo}
+      codeSentAt={codeSentAt}
+      onRequestCode={handleRequestCode}
+      onVerifyCode={handleVerifyCode}
+      onChangeEmail={handleChangeEmail}
+      isLoading={isSubmitting}
+      error={formError}
+    />
+  )
 }

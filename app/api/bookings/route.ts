@@ -10,11 +10,16 @@ import { NotificationModel } from "@/lib/models/Notification"
 import { createBookingSchema } from "@/features/bookings/schema"
 import { getBookings } from "@/features/bookings/server/get-bookings"
 import { resend } from "@/lib/resend"
+import { getBookingAlertEmail } from "@/features/settings/server/get-settings"
 import { newBookingOwnerEmailHtml } from "@/emails/new-booking-owner"
 import { appointmentConfirmedEmailHtml } from "@/emails/appointment-confirmed"
 import type { BookingStatus } from "@/types"
+import { denyUnlessOwner } from "@/features/auth/server/session"
 
 export async function GET(req: NextRequest) {
+  const denied = await denyUnlessOwner()
+  if (denied) return denied
+
   const status = req.nextUrl.searchParams.get("status") as BookingStatus | null
   const bookings = await getBookings(status ?? undefined)
   return NextResponse.json(bookings)
@@ -138,11 +143,13 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  if (!payingOnline && resend && process.env.OWNER_EMAIL) {
+  // Dashboard Settings → "Booking notification email" (falls back to OWNER_EMAIL).
+  const alertEmail = payingOnline ? null : await getBookingAlertEmail().catch(() => null)
+  if (resend && alertEmail) {
     try {
-      await resend.emails.send({
+      const { error } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
-        to: process.env.OWNER_EMAIL,
+        to: alertEmail,
         subject: "New Booking — Confirmed",
         html: newBookingOwnerEmailHtml({
           customerName,
@@ -153,6 +160,7 @@ export async function POST(req: NextRequest) {
           bookingTime,
         }),
       })
+      if (error) console.error("Owner notification email rejected by Resend:", error)
     } catch (err) {
       console.error("Failed to send owner notification email", err)
     }

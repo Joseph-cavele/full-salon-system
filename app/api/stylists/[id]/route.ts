@@ -2,11 +2,15 @@ import { NextRequest, NextResponse } from "next/server"
 import { connectDB } from "@/lib/db"
 import { StylistModel } from "@/lib/models/Stylist"
 import { stylistInputSchema } from "@/features/stylists/schema"
+import { denyUnlessOwner } from "@/features/auth/server/session"
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await denyUnlessOwner()
+  if (denied) return denied
+
   const { id } = await params
   const body = await req.json()
   const parsed = stylistInputSchema.safeParse(body)
@@ -34,6 +38,9 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await denyUnlessOwner()
+  if (denied) return denied
+
   const { id } = await params
   await connectDB()
   const stylist = await StylistModel.findByIdAndDelete(id)

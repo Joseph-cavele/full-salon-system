@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
 import { uploadImage, UPLOAD_FOLDERS, type UploadFolder } from "@/lib/cloudinary"
+import { clientIp, hit } from "@/lib/rate-limit"
+import { denyUnlessOwner } from "@/features/auth/server/session"
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"]
 const MAX_SIZE = 5 * 1024 * 1024
+const PUBLIC_UPLOAD_LIMIT = { bucket: "upload:ip", limit: 20, windowMs: 60 * 60 * 1000 }
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData()
@@ -35,6 +38,22 @@ export async function POST(req: NextRequest) {
     typeof requested === "string" && requested in UPLOAD_FOLDERS
       ? (requested as UploadFolder)
       : "hairstyles"
+
+  /* Customers attach hairstyle photos while booking, so that folder stays
+     open — but rate-limited per IP so it can't be used as free image
+     hosting. Service and stylist photos are the owner's alone. */
+  if (folder === "hairstyles") {
+    const allowed = await hit(PUBLIC_UPLOAD_LIMIT, clientIp(req.headers))
+    if (!allowed) {
+      return NextResponse.json(
+        { error: "Too many uploads. Please try again later." },
+        { status: 429 }
+      )
+    }
+  } else {
+    const denied = await denyUnlessOwner()
+    if (denied) return denied
+  }
 
   const buffer = Buffer.from(await file.arrayBuffer())
   const base64 = `data:${file.type};base64,${buffer.toString("base64")}`

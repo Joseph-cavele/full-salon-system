@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import NextImage from "next/image"
 import Link from "next/link"
 import {
@@ -12,7 +12,7 @@ import {
   type TargetAndTransition,
   type Transition,
 } from "motion/react"
-import { ArrowRight, Eye, EyeClosed, Lock, Mail } from "lucide-react"
+import { ArrowRight, KeyRound, Mail } from "lucide-react"
 
 import { BackgroundPaths } from "@/components/ui/modern-background-paths"
 import { cn } from "@/lib/utils"
@@ -26,9 +26,9 @@ import { cn } from "@/lib/utils"
  * scrim, same fuchsia filaments, same cool-slate glass. Signing in should feel
  * like the same building as the homepage, one room further in.
  *
- * Presentational only — it owns the field state and the show/hide toggle, but
- * hands credentials up through `onSubmit` so the auth wiring stays in
- * `features/auth`.
+ * Presentational only — it owns the field state, but hands the email and the
+ * emailed code up through callbacks so the auth wiring (and which `step` is
+ * showing) stays in `features/auth`.
  */
 
 /* The styling station rather than the hero's wide room shot — deliberately a
@@ -61,19 +61,42 @@ const CORNERS = [
   { at: "bottom-0 left-0 size-[5px] blur-[1px]", tint: "bg-rose-mid/50", duration: 2.3, delay: 1.5 },
 ] as const
 
-type FocusedInput = "email" | "password" | null
+type FocusedInput = "email" | "code" | null
+
+/** Matches RESEND_COOLDOWN_MS on the server, which ignores earlier resends. */
+const RESEND_COOLDOWN_S = 60
 
 export type SignInCard2Props = {
-  /** Receives the credentials on submit. Errors surface via `error`. */
-  onSubmit?: (values: {
-    email: string
-    password: string
-    rememberMe: boolean
-  }) => void | Promise<void>
+  /** "email" asks for the address; "code" asks for the code sent to it. */
+  step?: "email" | "code"
+  /** The address the code went to, shown on the code step. */
+  sentTo?: string | null
+  /** When the last code was sent (ms epoch) — drives the resend countdown. */
+  codeSentAt?: number | null
+  /** Receives the email on the first step, and again on "Resend code". */
+  onRequestCode?: (email: string) => void | Promise<void>
+  /** Receives the code typed on the second step. */
+  onVerifyCode?: (code: string) => void | Promise<void>
+  /** Back from the code step to the email step. */
+  onChangeEmail?: () => void
   /** Swaps the button label for a spinner and blocks re-submits. */
   isLoading?: boolean
-  /** Message shown above the fields, e.g. "Invalid email or password". */
+  /** Message shown above the fields, e.g. "That code is wrong or has expired". */
   error?: string | null
+}
+
+/** Seconds until another code may be requested; re-renders once a second. */
+function useResendCountdown(codeSentAt: number | null | undefined) {
+  const [now, setNow] = useState(() => Date.now())
+
+  useEffect(() => {
+    if (!codeSentAt) return
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [codeSentAt])
+
+  if (!codeSentAt) return 0
+  return Math.max(0, RESEND_COOLDOWN_S - Math.floor((now - codeSentAt) / 1000))
 }
 
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
@@ -92,12 +115,20 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   )
 }
 
-export function SignInCard2({ onSubmit, isLoading = false, error }: SignInCard2Props) {
-  const [showPassword, setShowPassword] = useState(false)
+export function SignInCard2({
+  step = "email",
+  sentTo,
+  codeSentAt,
+  onRequestCode,
+  onVerifyCode,
+  onChangeEmail,
+  isLoading = false,
+  error,
+}: SignInCard2Props) {
   const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [code, setCode] = useState("")
   const [focusedInput, setFocusedInput] = useState<FocusedInput>(null)
-  const [rememberMe, setRememberMe] = useState(false)
+  const resendIn = useResendCountdown(codeSentAt)
 
   // `useReducedMotion` is null on the server, so coerce before branching —
   // otherwise the first client render disagrees with the HTML and React
@@ -126,7 +157,19 @@ export function SignInCard2({ onSubmit, isLoading = false, error }: SignInCard2P
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (isLoading) return
-    onSubmit?.({ email, password, rememberMe })
+    if (step === "email") onRequestCode?.(email)
+    else onVerifyCode?.(code)
+  }
+
+  function handleResend() {
+    if (isLoading || resendIn > 0 || !sentTo) return
+    setCode("")
+    onRequestCode?.(sentTo)
+  }
+
+  function handleChangeEmail() {
+    setCode("")
+    onChangeEmail?.()
   }
 
   return (
@@ -304,7 +347,9 @@ export function SignInCard2({ onSubmit, isLoading = false, error }: SignInCard2P
                   transition={{ delay: 0.3 }}
                   className="mt-3 text-sm text-white/70"
                 >
-                  Welcome back — sign in to your dashboard.
+                  {step === "email"
+                    ? "Welcome back — enter your email and we'll send you a verification code."
+                    : "Enter the 6-digit code we emailed you."}
                 </motion.p>
               </div>
 
@@ -319,150 +364,114 @@ export function SignInCard2({ onSubmit, isLoading = false, error }: SignInCard2P
                 )}
 
                 <div className="space-y-3">
-                  {/* Email */}
-                  <motion.div
-                    className={cn("relative", focusedInput === "email" && "z-10")}
-                    whileHover={reduce ? undefined : { scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  >
-                    <div className="relative flex items-center overflow-hidden rounded-lg">
-                      <Mail
-                        aria-hidden
-                        className={cn(
-                          "pointer-events-none absolute left-3 size-4 transition-colors duration-300",
-                          focusedInput === "email" ? "text-rose-accent" : "text-white/40"
-                        )}
-                      />
-                      <Input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        required
-                        placeholder="Email address"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        onFocus={() => setFocusedInput("email")}
-                        onBlur={() => setFocusedInput(null)}
-                        className="focus:border-rose-accent/50 focus-visible:ring-rose-accent/30 h-10 w-full border-white/10 bg-white/5 pr-3 pl-10 text-white transition-all duration-300 placeholder:text-white/35 focus:bg-white/10"
-                      />
-                      {focusedInput === "email" && (
-                        <motion.div
-                          layoutId="input-highlight"
-                          className="absolute inset-0 -z-10 bg-white/5"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      )}
-                    </div>
-                  </motion.div>
-
-                  {/* Password */}
-                  <motion.div
-                    className={cn("relative", focusedInput === "password" && "z-10")}
-                    whileHover={reduce ? undefined : { scale: 1.01 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  >
-                    <div className="relative flex items-center overflow-hidden rounded-lg">
-                      <Lock
-                        aria-hidden
-                        className={cn(
-                          "pointer-events-none absolute left-3 size-4 transition-colors duration-300",
-                          focusedInput === "password" ? "text-rose-accent" : "text-white/40"
-                        )}
-                      />
-                      <Input
-                        id="password"
-                        name="password"
-                        type={showPassword ? "text" : "password"}
-                        autoComplete="current-password"
-                        required
-                        placeholder="Password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        onFocus={() => setFocusedInput("password")}
-                        onBlur={() => setFocusedInput(null)}
-                        className="focus:border-rose-accent/50 focus-visible:ring-rose-accent/30 h-10 w-full border-white/10 bg-white/5 pr-10 pl-10 text-white transition-all duration-300 placeholder:text-white/35 focus:bg-white/10"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword((v) => !v)}
-                        aria-label={showPassword ? "Hide password" : "Show password"}
-                        aria-pressed={showPassword}
-                        tabIndex={-1}
-                        className="hover:text-rose-accent absolute right-3 text-white/40 transition-colors duration-300"
-                      >
-                        {showPassword ? (
-                          <Eye className="size-4" />
-                        ) : (
-                          <EyeClosed className="size-4" />
-                        )}
-                      </button>
-                      {focusedInput === "password" && (
-                        <motion.div
-                          layoutId="input-highlight"
-                          className="absolute inset-0 -z-10 bg-white/5"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      )}
-                    </div>
-                  </motion.div>
-                </div>
-
-                {/* Remember me / forgot password */}
-                <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center space-x-2">
-                    <div className="relative flex items-center">
-                      <input
-                        id="remember-me"
-                        name="remember-me"
-                        type="checkbox"
-                        checked={rememberMe}
-                        onChange={() => setRememberMe((v) => !v)}
-                        className="checked:border-rose-accent checked:bg-rose-accent focus:ring-rose-accent/40 size-4 appearance-none rounded border border-white/25 bg-white/5 transition-all duration-200 focus:ring-1 focus:outline-none"
-                      />
-                      {rememberMe && (
-                        <motion.svg
-                          initial={{ opacity: 0, scale: 0.5 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="#ffffff"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          aria-hidden
-                          className="pointer-events-none absolute inset-0 m-auto"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </motion.svg>
-                      )}
-                    </div>
-                    <label
-                      htmlFor="remember-me"
-                      className="text-xs text-white/65 transition-colors duration-200 hover:text-white"
+                  {step === "email" ? (
+                    /* Email */
+                    <motion.div
+                      key="email"
+                      className={cn("relative", focusedInput === "email" && "z-10")}
+                      whileHover={reduce ? undefined : { scale: 1.01 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     >
-                      Remember me
-                    </label>
-                  </div>
-
-                  {/* No reset flow yet — kept visible as a placeholder. */}
-                  <span
-                    aria-disabled
-                    title="Password reset isn't available yet — ask the salon owner."
-                    className="cursor-not-allowed text-xs text-white/30"
-                  >
-                    Forgot password?
-                  </span>
+                      <div className="relative flex items-center overflow-hidden rounded-lg">
+                        <Mail
+                          aria-hidden
+                          className={cn(
+                            "pointer-events-none absolute left-3 size-4 transition-colors duration-300",
+                            focusedInput === "email" ? "text-rose-accent" : "text-white/40"
+                          )}
+                        />
+                        <Input
+                          id="email"
+                          name="email"
+                          type="email"
+                          autoComplete="email"
+                          required
+                          placeholder="Email address"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          onFocus={() => setFocusedInput("email")}
+                          onBlur={() => setFocusedInput(null)}
+                          className="focus:border-rose-accent/50 focus-visible:ring-rose-accent/30 h-10 w-full border-white/10 bg-white/5 pr-3 pl-10 text-white transition-all duration-300 placeholder:text-white/35 focus:bg-white/10"
+                        />
+                        {focusedInput === "email" && (
+                          <motion.div
+                            layoutId="input-highlight"
+                            className="absolute inset-0 -z-10 bg-white/5"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        )}
+                      </div>
+                    </motion.div>
+                  ) : (
+                    /* Code */
+                    <motion.div
+                      key="code"
+                      initial={reduce ? false : { opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="space-y-2"
+                    >
+                      <p className="text-center text-xs text-white/60">
+                        Sent to <span className="font-medium text-white/85">{sentTo}</span>
+                      </p>
+                      <div
+                        className={cn(
+                          "relative flex items-center overflow-hidden rounded-lg",
+                          focusedInput === "code" && "z-10"
+                        )}
+                      >
+                        <KeyRound
+                          aria-hidden
+                          className={cn(
+                            "pointer-events-none absolute left-3 size-4 transition-colors duration-300",
+                            focusedInput === "code" ? "text-rose-accent" : "text-white/40"
+                          )}
+                        />
+                        <Input
+                          id="code"
+                          name="code"
+                          type="text"
+                          inputMode="numeric"
+                          autoComplete="one-time-code"
+                          autoFocus
+                          required
+                          maxLength={6}
+                          aria-label="6-digit sign-in code"
+                          placeholder="000000"
+                          value={code}
+                          // Digits only, so a pasted "123 456" still works.
+                          onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          onFocus={() => setFocusedInput("code")}
+                          onBlur={() => setFocusedInput(null)}
+                          className="focus:border-rose-accent/50 focus-visible:ring-rose-accent/30 h-11 w-full border-white/10 bg-white/5 pr-3 pl-10 text-center font-mono text-lg tracking-[0.5em] text-white transition-all duration-300 placeholder:text-white/25 focus:bg-white/10"
+                        />
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
+
+                {/* Change email / resend — only once a code has gone out. */}
+                {step === "code" && (
+                  <div className="flex items-center justify-between pt-1 text-xs">
+                    <button
+                      type="button"
+                      onClick={handleChangeEmail}
+                      className="hover:text-rose-accent text-white/65 transition-colors duration-200"
+                    >
+                      ← Use a different email
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={isLoading || resendIn > 0}
+                      className="hover:text-rose-accent text-white/65 transition-colors duration-200 disabled:cursor-not-allowed disabled:text-white/30 disabled:hover:text-white/30"
+                    >
+                      {resendIn > 0 ? `Resend code in ${resendIn}s` : "Resend code"}
+                    </button>
+                  </div>
+                )}
 
                 {/* Submit */}
                 <motion.button
@@ -500,7 +509,7 @@ export function SignInCard2({ onSubmit, isLoading = false, error }: SignInCard2P
                           className="flex items-center justify-center"
                         >
                           <div className="size-4 animate-spin rounded-full border-2 border-white/70 border-t-transparent" />
-                          <span className="sr-only">Signing in…</span>
+                          <span className="sr-only">{step === "email" ? "Sending code…" : "Signing in…"}</span>
                         </motion.div>
                       ) : (
                         <motion.span
@@ -510,7 +519,7 @@ export function SignInCard2({ onSubmit, isLoading = false, error }: SignInCard2P
                           exit={{ opacity: 0 }}
                           className="flex items-center justify-center gap-1.5 text-sm font-semibold"
                         >
-                          Sign In
+                          {step === "email" ? "Send verification code" : "Verify & sign in"}
                           <ArrowRight
                             aria-hidden
                             className="size-3.5 transition-transform duration-300 group-hover/button:translate-x-1"
@@ -549,14 +558,7 @@ export function SignInCard2({ onSubmit, isLoading = false, error }: SignInCard2P
                 </button>
 
                 <p className="mt-4 text-center text-xs text-white/45">
-                  Staff accounts are created by the salon owner.{" "}
-                  <span
-                    aria-disabled
-                    title="Self-serve sign-up isn't available."
-                    className="cursor-not-allowed font-medium text-white/35"
-                  >
-                    Sign up
-                  </span>
+                  Dashboard access is for the salon owner only.
                 </p>
 
                 <p className="text-center text-xs">

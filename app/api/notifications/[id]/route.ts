@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { connectDB } from "@/lib/db"
 import { NotificationModel } from "@/lib/models/Notification"
+import { denyUnlessOwner } from "@/features/auth/server/session"
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await denyUnlessOwner()
+  if (denied) return denied
+
   const { id } = await params
   await connectDB()
 

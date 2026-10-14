@@ -3,14 +3,24 @@ import { connectDB } from "@/lib/db"
 import { StylistModel } from "@/lib/models/Stylist"
 import { stylistInputSchema } from "@/features/stylists/schema"
 import { getStylists } from "@/features/stylists/server/get-stylists"
+import { denyUnlessOwner } from "@/features/auth/server/session"
 
 export async function GET(req: NextRequest) {
   const all = req.nextUrl.searchParams.get("all")
+  // The booking form lists active stylists publicly; the full roster,
+  // inactive ones included, is the dashboard's.
+  if (all) {
+    const denied = await denyUnlessOwner()
+    if (denied) return denied
+  }
   const stylists = await getStylists(!!all)
   return NextResponse.json(stylists)
 }
 
 export async function POST(req: NextRequest) {
+  const denied = await denyUnlessOwner()
+  if (denied) return denied
+
   const body = await req.json()
   const parsed = stylistInputSchema.safeParse(body)
 

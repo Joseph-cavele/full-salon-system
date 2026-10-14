@@ -1,5 +1,4 @@
 import "dotenv/config"
-import bcrypt from "bcryptjs"
 import { connectDB } from "../lib/db"
 import { ServiceModel } from "../lib/models/Service"
 import { StylistModel } from "../lib/models/Stylist"
@@ -8,10 +7,9 @@ import { CustomerModel } from "../lib/models/Customer"
 import { BookingModel } from "../lib/models/Booking"
 import { NotificationModel } from "../lib/models/Notification"
 
-// Password for the seeded accounts. Set SEED_PASSWORD in your (gitignored) .env
-// so no real password is ever committed. The fallback is intentionally unusable
-// as a real credential — set SEED_PASSWORD and re-run `npm run seed` to apply.
-const DEV_PASSWORD = process.env.SEED_PASSWORD ?? "change-me-set-SEED_PASSWORD"
+// Sign-in is by emailed code, so the owner account must be a real inbox.
+// Falls back to a placeholder (codes then only appear in the dev console).
+const OWNER_LOGIN_EMAIL = (process.env.OWNER_EMAIL ?? "owner@salon.test").trim().toLowerCase()
 
 /* ══════════════════════════════════════════════════════════════════════
    The bookable service list. Two things about it matter:
@@ -83,15 +81,10 @@ async function seed() {
     }))
   )
 
-  const passwordHash = await bcrypt.hash(DEV_PASSWORD, 10)
+  // The one dashboard account. `npm run setup-owner` manages it afterwards.
   await UserModel.findOneAndUpdate(
-    { email: "owner@salon.test" },
-    { name: "Salon Owner", email: "owner@salon.test", password: passwordHash, role: "owner" },
-    { upsert: true }
-  )
-  await UserModel.findOneAndUpdate(
-    { email: "jordan@salon.test" },
-    { name: "Jordan Lee", email: "jordan@salon.test", password: passwordHash, role: "stylist" },
+    { role: "owner" },
+    { name: "Salon Owner", email: OWNER_LOGIN_EMAIL, role: "owner", status: "active", $unset: { password: 1 } },
     { upsert: true }
   )
 
@@ -112,9 +105,8 @@ async function seed() {
   console.log("Seeded data is live, but the app caches the service list on disk.")
   console.log("  rm -rf .next/cache   # then restart dev, or wait 300s")
   console.log("Cleared customers, bookings and notifications. No sample bookings were created.")
-  console.log(`Seeded users (dev password: "${DEV_PASSWORD}"):`)
-  console.log("  owner@salon.test (role: owner)")
-  console.log("  jordan@salon.test (role: stylist)")
+  console.log("Seeded users (sign in with an emailed code — no passwords):")
+  console.log(`  ${OWNER_LOGIN_EMAIL} (role: owner)`)
   process.exit(0)
 }
 

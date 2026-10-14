@@ -6,6 +6,7 @@ import { connectDB } from "@/lib/db"
 import { BookingModel } from "@/lib/models/Booking"
 import { NotificationModel } from "@/lib/models/Notification"
 import { resend } from "@/lib/resend"
+import { getBookingAlertEmail } from "@/features/settings/server/get-settings"
 import { verifyTransaction } from "@/lib/paystack"
 import "@/lib/models"
 
@@ -125,11 +126,13 @@ export async function confirmPaidBooking(reference: string): Promise<ConfirmOutc
      Sent independently of the customer email above — a failure there must not
      cost the owner their copy, and vice versa. Both are best-effort for the
      same reason: the payment is already taken. */
-  if (resend && process.env.OWNER_EMAIL) {
+  // Dashboard Settings → "Booking notification email" (falls back to OWNER_EMAIL).
+  const alertEmail = await getBookingAlertEmail().catch(() => null)
+  if (resend && alertEmail) {
     try {
       const { error } = await resend.emails.send({
         from: process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev",
-        to: process.env.OWNER_EMAIL,
+        to: alertEmail,
         subject: "New Booking — Paid Online",
         html: newBookingOwnerEmailHtml({
           customerName: booking.customer?.name ?? "A customer",

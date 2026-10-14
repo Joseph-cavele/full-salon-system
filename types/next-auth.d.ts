@@ -1,10 +1,13 @@
 import type { DefaultSession } from "next-auth"
 
-export type UserRole = "owner" | "stylist"
+/* Only the owner can sign in. Stored User records may still say "stylist"
+   (the model keeps it for old data), but no session is ever issued for one. */
+export type UserRole = "owner"
 
 declare module "next-auth" {
   interface Session {
     user: {
+      id: string
       role: UserRole
     } & DefaultSession["user"]
   }

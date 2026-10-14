@@ -7,6 +7,7 @@ import { updateBookingStatusSchema } from "@/features/bookings/schema"
 import { resend } from "@/lib/resend"
 import { appointmentConfirmedEmailHtml } from "@/emails/appointment-confirmed"
 import { appointmentCancelledEmailHtml } from "@/emails/appointment-cancelled"
+import { denyUnlessOwner } from "@/features/auth/server/session"
 
 interface PopulatedBooking {
   _id: unknown
@@ -22,6 +23,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await denyUnlessOwner()
+  if (denied) return denied
+
   const { id } = await params
   const body = await req.json()
   const parsed = updateBookingStatusSchema.safeParse(body)

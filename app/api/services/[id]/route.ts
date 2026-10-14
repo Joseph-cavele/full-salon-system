@@ -3,11 +3,15 @@ import { revalidateTag } from "next/cache"
 import { connectDB } from "@/lib/db"
 import { ServiceModel } from "@/lib/models/Service"
 import { serviceInputSchema } from "@/features/services/schema"
+import { denyUnlessOwner } from "@/features/auth/server/session"
 
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await denyUnlessOwner()
+  if (denied) return denied
+
   const { id } = await params
   const body = await req.json()
   const parsed = serviceInputSchema.safeParse(body)
@@ -38,6 +42,9 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const denied = await denyUnlessOwner()
+  if (denied) return denied
+
   const { id } = await params
   await connectDB()
   const service = await ServiceModel.findByIdAndDelete(id)

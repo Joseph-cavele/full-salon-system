@@ -1,9 +1,12 @@
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query"
 import { getQueryClient } from "@/lib/get-query-client"
+import { requireOwner } from "@/features/auth/server/session"
 import { getDashboardData } from "@/features/dashboard/server/get-dashboard-data"
 import { DashboardContent } from "@/app/dashboard/dashboard-content"
 
 export default async function DashboardPage() {
+  await requireOwner()
+
   const queryClient = getQueryClient()
 
   // Fetch on the server and hydrate the client cache, so DashboardContent's

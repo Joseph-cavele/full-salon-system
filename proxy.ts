@@ -1,26 +1,19 @@
 import { auth } from "@/auth"
 import { NextResponse } from "next/server"
 
+/* An early redirect for signed-out visitors — a convenience, not the
+   protection. The real checks run next to the data: requireOwner() in every
+   dashboard page and denyUnlessOwner() in every private API route (see
+   features/auth/server/session.ts), because proxy only sees this matcher and
+   can't tell a disabled account from an active one. */
 export default auth((req) => {
-  const { pathname } = req.nextUrl
+  if (req.auth?.user?.role === "owner") return
 
-  if (!req.auth) {
-    const loginUrl = new URL("/login", req.nextUrl)
-    loginUrl.searchParams.set("callbackUrl", pathname)
-    return NextResponse.redirect(loginUrl)
-  }
-
-  const role = req.auth.user.role
-
-  if (pathname.startsWith("/dashboard") && role !== "owner") {
-    return NextResponse.redirect(new URL("/stylist", req.nextUrl))
-  }
-
-  if (pathname.startsWith("/stylist") && role !== "stylist") {
-    return NextResponse.redirect(new URL("/dashboard", req.nextUrl))
-  }
+  const loginUrl = new URL("/login", req.nextUrl)
+  loginUrl.searchParams.set("callbackUrl", req.nextUrl.pathname)
+  return NextResponse.redirect(loginUrl)
 })
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/stylist/:path*"],
+  matcher: ["/dashboard/:path*"],
 }

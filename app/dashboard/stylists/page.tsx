@@ -1,9 +1,12 @@
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query"
 import { getQueryClient } from "@/lib/get-query-client"
+import { requireOwner } from "@/features/auth/server/session"
 import { getStylists } from "@/features/stylists/server/get-stylists"
 import { StylistsManagement } from "@/features/stylists/components/stylists-management"
 
 export default async function DashboardStylistsPage() {
+  await requireOwner()
+
   const queryClient = getQueryClient()
 
   // Matches useAllStylists() -> ["stylists", "all"] (fetches all stylists).
