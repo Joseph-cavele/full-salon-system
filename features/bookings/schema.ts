@@ -15,7 +15,9 @@ export const createBookingSchema = z.object({
   /** Which button the customer pressed on the review step. */
   paymentMethod: z.enum(["ONLINE", "IN_PERSON"]),
   serviceIds: z.array(z.string()).min(1, "Select at least one service"),
-  stylistId: z.string().min(1, "Select a stylist"),
+  /* No stylistId: the server assigns the stylist (see
+     features/bookings/server/booking-stylist.ts). An older cached page that
+     still sends one has it stripped here, since z.object drops unknown keys. */
   bookingDate: z.string().min(1, "Select a date"),
   bookingTime: z.string().min(1, "Select a time"),
   description: z.string().trim().optional(),

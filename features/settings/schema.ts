@@ -12,6 +12,8 @@ export const settingsSchema = z.object({
     z.literal(""),
   ]),
   emailNotifications: z.boolean(),
+  // A Stylist id, or "" for "not set" (falls back to the first active stylist).
+  bookingStylistId: z.union([z.string().regex(/^[a-f\d]{24}$/i, "Choose a stylist"), z.literal("")]),
 })
 
 export type SettingsFormValues = z.infer<typeof settingsSchema>

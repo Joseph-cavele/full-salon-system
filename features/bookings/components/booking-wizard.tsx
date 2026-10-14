@@ -18,7 +18,6 @@ import {
   Scissors,
   Sparkles,
   UserRound,
-  Users,
 } from "lucide-react"
 import {
   createBookingSchema,
@@ -26,13 +25,11 @@ import {
 } from "@/features/bookings/schema"
 import { DEFAULT_SERVICE_CATEGORY, SERVICE_CATEGORIES } from "@/features/services/schema"
 import { useServices } from "@/features/bookings/hooks/use-services"
-import { useStylists } from "@/features/bookings/hooks/use-stylists"
 import { useCreateBooking } from "@/features/bookings/hooks/use-create-booking"
 import { HairstyleUpload } from "@/features/bookings/components/hairstyle-upload"
 import { startPayment } from "@/features/bookings/start-payment"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { stockPhotos, serviceThumb } from "@/lib/stock-photos"
 import { serviceImageByName } from "@/lib/salon-services"
@@ -43,12 +40,14 @@ import {
   whatsappLink,
 } from "@/lib/salon-contact"
 import { formatCurrency } from "@/lib/currency"
-import type { PaymentMethod, Service, Stylist } from "@/types"
+import type { PaymentMethod, Service } from "@/types"
 
 
+/* No stylist step: clients don't choose who does their hair. The server
+   assigns every booking to the stylist set in Dashboard → Settings (see
+   features/bookings/server/booking-stylist.ts). */
 const STEPS = [
   { key: "service", label: "Service", icon: Scissors },
-  { key: "staff", label: "Staff", icon: Users },
   { key: "datetime", label: "Date & Time", icon: CalendarDays },
   { key: "details", label: "Your Details", icon: UserRound },
   { key: "review", label: "Review & Confirm", icon: BadgeCheck },
@@ -56,7 +55,6 @@ const STEPS = [
 
 const STEP_FIELDS: (keyof CreateBookingFormValues)[][] = [
   ["serviceIds"],
-  ["stylistId"],
   ["bookingDate", "bookingTime"],
   ["customerName", "customerEmail", "customerPhone"],
   [],
@@ -107,12 +105,6 @@ export function BookingWizard() {
     isError: servicesError,
     refetch: refetchServices,
   } = useServices()
-  const {
-    data: stylists = [],
-    isLoading: stylistsLoading,
-    isError: stylistsError,
-    refetch: refetchStylists,
-  } = useStylists()
   const createBooking = useCreateBooking()
 
   const {
@@ -132,7 +124,6 @@ export function BookingWizard() {
       // Overwritten by whichever finish button is pressed.
       paymentMethod: "IN_PERSON",
       serviceIds: [],
-      stylistId: "",
       bookingDate: "",
       bookingTime: "",
       description: "",
@@ -143,7 +134,6 @@ export function BookingWizard() {
 
   const values = watch()
   const selectedService = services.find((s) => s.id === values.serviceIds?.[0])
-  const selectedStylist = stylists.find((s) => s.id === values.stylistId)
 
   /* Resolution order matters. A photo stored on the Service document wins,
      because that is the salon's own upload. Otherwise the curated map keyed
@@ -175,8 +165,7 @@ export function BookingWizard() {
     const valid = await trigger(STEP_FIELDS[step])
     if (!valid) {
       if (step === 0) toast.error("Please choose a service to continue")
-      if (step === 1) toast.error("Please choose a stylist to continue")
-      if (step === 2) toast.error("Please pick a date and time")
+      if (step === 1) toast.error("Please pick a date and time")
       return
     }
     setStep((s) => Math.min(s + 1, STEPS.length - 1))
@@ -216,7 +205,7 @@ export function BookingWizard() {
       window.scrollTo({ top: 0, behavior: "smooth" })
     } catch (err) {
       setPendingMethod(null)
-      // Surface the server's actual reason (e.g. "Stylist not found",
+      // Surface the server's actual reason (e.g. "Service not found",
       // "Invalid booking data") instead of a generic message, so failures
       // are diagnosable rather than silent.
       const serverError =
@@ -363,18 +352,6 @@ export function BookingWizard() {
         )}
 
         {step === 1 && (
-          <StaffStep
-            stylists={stylists}
-            selectedService={selectedService}
-            selectedId={values.stylistId}
-            onSelect={(id) => setValue("stylistId", id, { shouldValidate: true })}
-            isLoading={stylistsLoading}
-            isError={stylistsError}
-            onRetry={() => refetchStylists()}
-          />
-        )}
-
-        {step === 2 && (
           <DateTimeStep
             date={values.bookingDate}
             time={values.bookingTime}
@@ -387,7 +364,7 @@ export function BookingWizard() {
           />
         )}
 
-        {step === 3 && (
+        {step === 2 && (
           <DetailsStep
             register={register}
             errors={errors}
@@ -397,10 +374,9 @@ export function BookingWizard() {
           />
         )}
 
-        {step === 4 && (
+        {step === 3 && (
           <ReviewStep
             service={selectedService}
-            stylist={selectedStylist}
             date={values.bookingDate}
             time={values.bookingTime}
             name={values.customerName}
@@ -472,7 +448,6 @@ export function BookingWizard() {
       <aside className="flex flex-col gap-5">
         <BookingSummary
           service={selectedService}
-          stylist={selectedStylist}
           date={values.bookingDate}
           time={values.bookingTime}
           serviceImage={serviceImage}
@@ -657,129 +632,7 @@ function ServiceStep({
   )
 }
 
-/* ---------------- Step 2: Staff ---------------- */
-
-function StaffStep({
-  stylists,
-  selectedService,
-  selectedId,
-  onSelect,
-  isLoading,
-  isError,
-  onRetry,
-}: {
-  stylists: Stylist[]
-  selectedService?: Service
-  selectedId?: string
-  onSelect: (id: string) => void
-  isLoading: boolean
-  isError: boolean
-  onRetry: () => void
-}) {
-  const eligible = selectedService
-    ? stylists.filter(
-        (s) =>
-          s.services.length === 0 ||
-          s.services.some((svc) => svc.id === selectedService.id)
-      )
-    : stylists
-  const list = eligible.length > 0 ? eligible : stylists
-
-  return (
-    <div>
-      <h2 className="font-display text-xl font-semibold text-rose-ink">
-        2. Choose Your Stylist
-      </h2>
-      <p className="mt-1 text-sm text-rose-muted">
-        Pick the professional you&apos;d like to book with.
-      </p>
-
-      {isLoading ? (
-        <div className="flex items-center justify-center gap-2 py-12 text-sm text-rose-muted">
-          <Loader2 className="size-4 animate-spin" />
-          Loading stylists…
-        </div>
-      ) : isError ? (
-        <div className="mt-5 flex flex-col items-center gap-3 rounded-xl border border-dashed border-rose-mid py-12 text-center text-sm text-rose-muted">
-          Couldn&apos;t load stylists. Please try again.
-          <button
-            type="button"
-            onClick={onRetry}
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-rose-accent px-4 text-xs font-semibold text-white hover:bg-rose-accent/90"
-          >
-            Retry
-          </button>
-        </div>
-      ) : list.length === 0 ? (
-        <div className="mt-5 rounded-xl border border-dashed border-rose-mid py-12 text-center text-sm text-rose-muted/70">
-          No stylists available right now.
-        </div>
-      ) : (
-      <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        {list.map((stylist, i) => {
-          const active = selectedId === stylist.id
-          return (
-            <button
-              key={stylist.id}
-              type="button"
-              onClick={() => onSelect(stylist.id)}
-              className={cn(
-                "flex items-center gap-3 rounded-xl border p-3 text-left transition-colors",
-                active
-                  ? "border-rose-accent bg-rose-accent/5"
-                  : "border-rose-mid hover:border-rose-accent/50"
-              )}
-            >
-              <Avatar size="lg" className="size-12">
-                {/* The stylist's own photo wins. The stock array behind it is
-                    positional — `[i % length]` — so it hands whichever face
-                    sits at that index to whoever is standing in that slot.
-                    That is harmless for interchangeable stock, but it would
-                    put a real person's photograph under a different
-                    stylist's name, which the alt text then states as fact.
-                    A real photo therefore belongs on the Stylist document,
-                    not in the fallback pool. */}
-                <AvatarImage
-                  src={
-                    stylist.image ||
-                    stockPhotos.stylistHeadshots[i % stockPhotos.stylistHeadshots.length]
-                  }
-                  alt={stylist.name}
-                />
-                <AvatarFallback>
-                  {stylist.name
-                    .split(" ")
-                    .map((p) => p[0])
-                    .slice(0, 2)
-                    .join("")}
-                </AvatarFallback>
-              </Avatar>
-              <div className="min-w-0 flex-1">
-                <h3 className="font-medium text-rose-ink">{stylist.name}</h3>
-                <p className="line-clamp-1 text-xs text-rose-muted">
-                  {stylist.services.map((s) => s.name).slice(0, 2).join(", ") ||
-                    stylist.bio ||
-                    "Salon stylist"}
-                </p>
-              </div>
-              <span
-                className={cn(
-                  "flex size-5 shrink-0 items-center justify-center rounded-full border",
-                  active ? "border-rose-accent" : "border-rose-mid"
-                )}
-              >
-                {active && <span className="size-2.5 rounded-full bg-rose-accent" />}
-              </span>
-            </button>
-          )
-        })}
-      </div>
-      )}
-    </div>
-  )
-}
-
-/* ---------------- Step 3: Date & Time ---------------- */
+/* ---------------- Step 2: Date & Time ---------------- */
 
 function DateTimeStep({
   date,
@@ -797,7 +650,7 @@ function DateTimeStep({
   return (
     <div>
       <h2 className="font-display text-xl font-semibold text-rose-ink">
-        3. Select Date &amp; Time
+        2. Select Date &amp; Time
       </h2>
       <p className="mt-1 text-sm text-rose-muted">
         Choose when you&apos;d like your appointment.
@@ -843,7 +696,7 @@ function DateTimeStep({
   )
 }
 
-/* ---------------- Step 4: Details ---------------- */
+/* ---------------- Step 3: Details ---------------- */
 
 function DetailsStep({
   register,
@@ -859,7 +712,7 @@ function DetailsStep({
   return (
     <div>
       <h2 className="font-display text-xl font-semibold text-rose-ink">
-        4. Your Details
+        3. Your Details
       </h2>
       <p className="mt-1 text-sm text-rose-muted">
         Tell us who the appointment is for.
@@ -933,18 +786,16 @@ function DetailsStep({
   )
 }
 
-/* ---------------- Step 5: Review ---------------- */
+/* ---------------- Step 4: Review ---------------- */
 
 function ReviewStep({
   service,
-  stylist,
   date,
   time,
   name,
   email,
 }: {
   service?: Service
-  stylist?: Stylist
   date: string
   time: string
   name: string
@@ -952,7 +803,6 @@ function ReviewStep({
 }) {
   const rows = [
     { label: "Service", value: service?.name },
-    { label: "Stylist", value: stylist?.name },
     { label: "Date", value: date ? formatDate(date) : undefined },
     { label: "Time", value: time ? formatTime(time) : undefined },
     { label: "Duration", value: service ? formatDuration(service.duration) : undefined },
@@ -963,7 +813,7 @@ function ReviewStep({
   return (
     <div>
       <h2 className="font-display text-xl font-semibold text-rose-ink">
-        5. Review &amp; Confirm
+        4. Review &amp; Confirm
       </h2>
       <p className="mt-1 text-sm text-rose-muted">
         Please review your appointment details before confirming.
@@ -991,14 +841,12 @@ function ReviewStep({
 
 function BookingSummary({
   service,
-  stylist,
   date,
   time,
   serviceImage,
   serviceImageAlt,
 }: {
   service?: Service
-  stylist?: Stylist
   date: string
   time: string
   serviceImage: (s: Service) => string
@@ -1006,7 +854,6 @@ function BookingSummary({
 }) {
   const rows = [
     { label: "Service", value: service?.name },
-    { label: "Staff", value: stylist?.name },
     {
       label: "Date & Time",
       value: date && time ? `${formatDate(date)}, ${formatTime(time)}` : date ? formatDate(date) : undefined,

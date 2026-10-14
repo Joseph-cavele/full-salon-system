@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { revalidateTag } from "next/cache"
 import { connectDB } from "@/lib/db"
 import { CustomerModel } from "@/lib/models/Customer"
-import { StylistModel } from "@/lib/models/Stylist"
 import { ServiceModel } from "@/lib/models/Service"
 import { BookingModel } from "@/lib/models/Booking"
 import { BookingImageModel } from "@/lib/models/BookingImage"
@@ -11,6 +10,7 @@ import { createBookingSchema } from "@/features/bookings/schema"
 import { getBookings } from "@/features/bookings/server/get-bookings"
 import { resend } from "@/lib/resend"
 import { getBookingAlertEmail } from "@/features/settings/server/get-settings"
+import { getBookingStylist } from "@/features/bookings/server/booking-stylist"
 import { newBookingOwnerEmailHtml } from "@/emails/new-booking-owner"
 import { appointmentConfirmedEmailHtml } from "@/emails/appointment-confirmed"
 import type { BookingStatus } from "@/types"
@@ -42,7 +42,6 @@ export async function POST(req: NextRequest) {
     customerPhone,
     paymentMethod,
     serviceIds,
-    stylistId,
     bookingDate,
     bookingTime,
     description,
@@ -52,9 +51,13 @@ export async function POST(req: NextRequest) {
 
   await connectDB()
 
-  const stylist = await StylistModel.findById(stylistId)
+  // Assigned by the salon, not chosen by the client.
+  const stylist = await getBookingStylist()
   if (!stylist) {
-    return NextResponse.json({ error: "Stylist not found" }, { status: 404 })
+    return NextResponse.json(
+      { error: "Online booking is unavailable right now. Please call or WhatsApp the salon." },
+      { status: 503 }
+    )
   }
 
   const services = await ServiceModel.find({ _id: { $in: serviceIds } })

@@ -165,6 +165,8 @@ export interface SalonSettings {
   openingHours: string
   notificationEmail: string
   emailNotifications: boolean
+  /** Stylist every new booking is assigned to; "" when not set. */
+  bookingStylistId: string
 }
 
 export interface Notification {

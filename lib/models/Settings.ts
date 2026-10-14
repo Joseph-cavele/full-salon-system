@@ -18,6 +18,10 @@ const settingsSchema = new Schema(
     openingHours: { type: String, default: "Open 24 hours, 7 days a week" },
     notificationEmail: { type: String, default: "" },
     emailNotifications: { type: Boolean, default: true },
+    /* Every new booking is assigned to this stylist — clients don't choose.
+       Unset (or inactive) falls back to the first active stylist; see
+       features/bookings/server/booking-stylist.ts. */
+    bookingStylist: { type: Schema.Types.ObjectId, ref: "Stylist", default: null },
   },
   { timestamps: true }
 )

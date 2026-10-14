@@ -12,7 +12,15 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useAllStylists } from "@/features/stylists/hooks/use-all-stylists"
 
 const EMPTY: SettingsFormValues = {
   salonName: "",
@@ -23,11 +31,15 @@ const EMPTY: SettingsFormValues = {
   openingHours: "",
   notificationEmail: "",
   emailNotifications: true,
+  bookingStylistId: "",
 }
 
 export function SettingsForm() {
   const { data, isLoading } = useSettings()
   const updateSettings = useUpdateSettings()
+  const { data: allStylists = [] } = useAllStylists()
+  // Inactive stylists can't take bookings, so they aren't offered.
+  const activeStylists = allStylists.filter((s) => s.active)
 
   const {
     register,
@@ -99,6 +111,42 @@ export function SettingsForm() {
                 <Input id="openingHours" {...register("openingHours")} />
                 {errors.openingHours && <FieldError>{errors.openingHours.message}</FieldError>}
               </Field>
+
+              <div className="border-t pt-5">
+                <Controller
+                  control={control}
+                  name="bookingStylistId"
+                  render={({ field }) => (
+                    <Field>
+                      <FieldLabel htmlFor="bookingStylistId">Stylist for new bookings</FieldLabel>
+                      <Select
+                        value={field.value}
+                        onValueChange={(v) => field.onChange(v ?? "")}
+                        // Lets the trigger show the name rather than the id.
+                        items={Object.fromEntries(activeStylists.map((s) => [s.id, s.name]))}
+                      >
+                        <SelectTrigger id="bookingStylistId" className="w-full">
+                          <SelectValue placeholder="First active stylist" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {activeStylists.map((stylist) => (
+                            <SelectItem key={stylist.id} value={stylist.id}>
+                              {stylist.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FieldDescription>
+                        Clients don&apos;t choose a stylist — every new booking is assigned to
+                        this person.
+                      </FieldDescription>
+                      {errors.bookingStylistId && (
+                        <FieldError>{errors.bookingStylistId.message}</FieldError>
+                      )}
+                    </Field>
+                  )}
+                />
+              </div>
 
               <div className="border-t pt-5">
                 <Field>

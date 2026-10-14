@@ -11,6 +11,7 @@ interface SettingsDoc {
   openingHours: string
   notificationEmail: string
   emailNotifications: boolean
+  bookingStylist?: unknown
 }
 
 export function serializeSettings(doc: SettingsDoc): SalonSettings {
@@ -23,6 +24,7 @@ export function serializeSettings(doc: SettingsDoc): SalonSettings {
     openingHours: doc.openingHours,
     notificationEmail: doc.notificationEmail ?? "",
     emailNotifications: doc.emailNotifications,
+    bookingStylistId: doc.bookingStylist ? String(doc.bookingStylist) : "",
   }
 }
 

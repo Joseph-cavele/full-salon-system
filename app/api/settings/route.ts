@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { connectDB } from "@/lib/db"
 import { SettingsModel } from "@/lib/models/Settings"
+import { StylistModel } from "@/lib/models/Stylist"
 import { settingsSchema } from "@/features/settings/schema"
 import {
   getSettings,
@@ -17,6 +18,7 @@ interface SettingsDoc {
   openingHours: string
   notificationEmail: string
   emailNotifications: boolean
+  bookingStylist?: unknown
 }
 
 export async function GET() {
@@ -46,10 +48,19 @@ export async function PUT(req: NextRequest) {
     )
   }
 
+  const { bookingStylistId, ...fields } = parsed.data
+
   await connectDB()
+  if (bookingStylistId && !(await StylistModel.exists({ _id: bookingStylistId, active: true }))) {
+    return NextResponse.json(
+      { error: "That stylist doesn't exist or isn't active" },
+      { status: 400 }
+    )
+  }
+
   const settings = await SettingsModel.findOneAndUpdate(
     { key: "salon" },
-    { ...parsed.data, key: "salon" },
+    { ...fields, bookingStylist: bookingStylistId || null, key: "salon" },
     { upsert: true, returnDocument: "after", setDefaultsOnInsert: true }
   ).lean<SettingsDoc>()
 
